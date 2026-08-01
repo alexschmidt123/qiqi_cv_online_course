@@ -1,0 +1,19 @@
+# Environment and secrets
+.env
+.env.local
+*.env
+
+# Generated output (paths.py → output/)
+output/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# IDE / OS
+.idea/
+.DS_Store
+*.swp
+*.swo
