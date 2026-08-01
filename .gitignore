@@ -6,6 +6,19 @@
 # Generated output (paths.py → output/)
 output/
 
+# Videos are local data and must not be synced/versioned, regardless of folder.
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.mkv
+*.webm
+*.wmv
+*.flv
+*.mpeg
+*.mpg
+*.3gp
+
 # Python
 __pycache__/
 *.py[cod]
