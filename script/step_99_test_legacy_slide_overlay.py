@@ -30,9 +30,9 @@ _ROOT = os.path.dirname(_SI_DIR)
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from script.step_2_detect_section import bl_to_tl  # noqa: E402
+from step_90_legacy_article_detect_sections import bl_to_tl  # noqa: E402
 
-from step_2_detect_elements import (  # noqa: E402
+from step_94_legacy_slide_detect_elements import (  # noqa: E402
     DEFAULT_GAZE_MATCH_THRESHOLD_PX,
     choose_element_for_gaze,
     detect_elements_for_validation,
@@ -40,9 +40,9 @@ from step_2_detect_elements import (  # noqa: E402
     detect_text_frame_popup_rect,
     to_public_element_name,
 )
-from step_4_validate_image import _draw_overlay  # noqa: E402
+from step_96_legacy_slide_validate import _draw_overlay  # noqa: E402
 
-from chrome_geometry import detect_ppt_rect_from_chrome  # noqa: E402
+from step_80_chrome_geometry import detect_ppt_rect_from_chrome  # noqa: E402
 
 
 def _tl_to_bl(x_tl: float, y_tl: float, frame_h: int) -> Tuple[float, float]:

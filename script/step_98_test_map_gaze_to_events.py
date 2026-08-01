@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from gaze_to_events import build_events, label_gaze_rows, load_library
+from step_3_map_gaze_to_events import build_events, label_gaze_rows, load_library
 
 
 class PipelineTest(unittest.TestCase):

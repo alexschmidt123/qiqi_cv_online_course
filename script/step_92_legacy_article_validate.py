@@ -1,10 +1,10 @@
-"""
+"""Legacy article validation renderer retained for reproducibility.
 Step 4 (optional): Visual validation of final gaze + section per video.
 
 For one video:
 - Input:
     - video file
-    - final_gaze_table.csv (from step_3_refine_with_gpt.py)
+    - final_gaze_table.csv (from legacy step_3_refine_with_gpt.py)
     - optional debug/step2_bucket_debug.csv (same output folder as the pipeline) for scrollable-area box
 - Output (in output/<video_name>/validation/):
     - frame_1s.png
@@ -289,4 +289,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

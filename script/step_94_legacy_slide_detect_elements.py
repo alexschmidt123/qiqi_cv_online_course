@@ -52,19 +52,19 @@ try:
 except ImportError:
     easyocr = None
 
-from script.step_2_detect_section import bl_to_tl  # noqa: E402
+from step_90_legacy_article_detect_sections import bl_to_tl  # noqa: E402
 
-from chrome_geometry import navigation_bar_bbox_tight  # noqa: E402
+from step_80_chrome_geometry import navigation_bar_bbox_tight  # noqa: E402
 
 _SI_DIR = os.path.dirname(os.path.abspath(__file__))
 if _SI_DIR not in sys.path:
     sys.path.insert(0, _SI_DIR)
 try:
-    from ppt_region_openai import detect_ppt_rect_from_frame_openai
+    from step_81_legacy_slide_region_ai import detect_ppt_rect_from_frame_openai
 except ImportError:
     detect_ppt_rect_from_frame_openai = None  # type: ignore
 try:
-    from ppt_ui_elements_openai import detect_ppt_ui_elements_openai
+    from step_82_legacy_slide_elements_ai import detect_ppt_ui_elements_openai
 except ImportError:
     detect_ppt_ui_elements_openai = None  # type: ignore
 
@@ -440,7 +440,7 @@ def detect_nav_bar_top_y(frame: np.ndarray) -> float:
     Uses the same logic as chrome_geometry: scan only the lower ~half of the frame so
     the red slide heading is not mistaken for the nav strip.
     """
-    from chrome_geometry import detect_nav_bar_top_y_in_player
+    from step_80_chrome_geometry import detect_nav_bar_top_y_in_player
 
     h, w = frame.shape[:2]
     return detect_nav_bar_top_y_in_player(frame, 0, w - 1)
@@ -508,7 +508,7 @@ def detect_ppt_rect_from_frame(frame: np.ndarray) -> Tuple[float, float, float, 
     Prefer chrome-based PPT box (black pillar runs + red nav top); fall back to
     column-profile heuristic.
     """
-    from chrome_geometry import detect_ppt_rect_from_chrome
+    from step_80_chrome_geometry import detect_ppt_rect_from_chrome
 
     ppt = detect_ppt_rect_from_chrome(frame)
     if ppt is not None:
@@ -1534,7 +1534,7 @@ def process_video(
         cap.set(cv2.CAP_PROP_POS_FRAMES, fidx0)
         ret0, frame_ref = cap.read()
         if ret0 and frame_ref is not None:
-            from chrome_geometry import detect_ppt_rect_from_chrome
+            from step_80_chrome_geometry import detect_ppt_rect_from_chrome
 
             unified_ppt = detect_ppt_rect_from_chrome(frame_ref)
             if unified_ppt is not None:
@@ -1560,7 +1560,7 @@ def process_video(
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         ret0, frame_ref = cap.read()
         if ret0 and frame_ref is not None:
-            from chrome_geometry import detect_ppt_rect_from_chrome
+            from step_80_chrome_geometry import detect_ppt_rect_from_chrome
 
             unified_ppt = detect_ppt_rect_from_chrome(frame_ref)
             if unified_ppt is not None:

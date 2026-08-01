@@ -1,4 +1,4 @@
-"""
+"""Legacy article GPT refiner retained for reproducibility.
 Step 3 (optional): Use ChatGPT to refine OCR text and produce the final unified gaze table.
 
 For one video (one output folder):
@@ -11,7 +11,7 @@ For one video (one output folder):
     - gaze_section_gpt_report.md  # short QA report on gaze→section mapping
 
 Usage (from project root):
-  python script/step_3_refine_with_gpt.py --output-dir output/R10,P8_2
+  python script_legacy/step_3_refine_with_gpt.py --output-dir output/R10,P8_2
 
 Requires:
   - OPENAI_API_KEY in environment or in .env at project root.

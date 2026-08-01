@@ -1,4 +1,4 @@
-"""
+"""Legacy article detector retained for reproducibility.
 Step 2: Assign section names (ALL CAPS headings above gaze) and export full text per video.
 Uses time buckets (e.g. 1s): run OCR once per bucket on one frame for headings/sections.
 
@@ -7,7 +7,7 @@ merged headings, then reused unchanged for the entire video (fixed UI; only page
 
 Input: video + gaze CSV from step_1_detect_gaze.py. Output: full_text.txt, gaze_with_section.csv, gaze_ocr_log.txt in --output-dir.
 
-Runs alone: python script/step_2_detect_section.py --video path.mp4 --gaze-csv output/NAME/gaze_coordinates.csv --output-dir output/NAME [--interval 1]
+Runs alone: python script_legacy/step_2_detect_section.py --video path.mp4 --gaze-csv output/NAME/gaze_coordinates.csv --output-dir output/NAME [--interval 1]
 """
 import argparse
 import csv

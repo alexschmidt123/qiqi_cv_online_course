@@ -1,4 +1,4 @@
-"""
+"""Legacy AI slide-element helper.
 Detect **PPT-slide** circular ``button`` boxes and ``button_text`` overlays via OpenAI vision (VLM).
 
 **Buttons:** bordered circles with one digit/symbol on the slide (maybe **none**). After a click,
@@ -92,7 +92,7 @@ def _elements_from_parsed(
 ) -> List[Any]:
     global _Element
     if _Element is None:
-        from step_2_detect_elements import Element as _E
+        from step_94_legacy_slide_detect_elements import Element as _E
 
         _Element = _E
 

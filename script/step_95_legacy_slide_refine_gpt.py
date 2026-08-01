@@ -39,8 +39,8 @@ if _PROJECT_ROOT not in sys.path:
 if _SI_DIR not in sys.path:
     sys.path.insert(0, _SI_DIR)
 
-from script.step_2_detect_section import bl_to_tl  # noqa: E402
-from step_2_detect_elements import (  # noqa: E402
+from step_90_legacy_article_detect_sections import bl_to_tl  # noqa: E402
+from step_94_legacy_slide_detect_elements import (  # noqa: E402
     NAV_BAR_HEIGHT_PX,
     NAV_BOTTOM_BAND_EXTRA_PX,
     NAV_GAZE_NEAR_PX,

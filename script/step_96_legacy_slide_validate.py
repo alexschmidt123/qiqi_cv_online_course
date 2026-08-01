@@ -29,13 +29,13 @@ import numpy as np
 _SI_DIR = os.path.dirname(os.path.abspath(__file__))
 if _SI_DIR not in sys.path:
     sys.path.insert(0, _SI_DIR)
-from step_2_detect_elements import (
+from step_94_legacy_slide_detect_elements import (
     Element,
     detect_elements_for_validation,
     detect_text_frame_popup_rect,
 )
 
-from chrome_geometry import (
+from step_80_chrome_geometry import (
     NAV_BAR_HEIGHT_PX,
     detect_nav_bar_top_y_in_player,
     detect_ppt_rect_from_chrome,

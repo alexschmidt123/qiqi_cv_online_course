@@ -3,6 +3,6 @@ opencv-python>=4.5.0
 numpy>=1.19.0
 easyocr>=1.7.0
 
-# Step 3: GPT refinement and final_gaze_table.csv
-openai>=1.0.0
+# Step 2: Responses API vision/layout analysis and report generation
+openai>=1.109.0
 python-dotenv>=1.0.0

@@ -15,11 +15,6 @@ import re
 import cv2
 import numpy as np
 
-try:
-    import easyocr
-except ImportError:
-    easyocr = None
-
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "output")
 VIDEO_DIR = os.path.join(_PROJECT_ROOT, "data", "video")
@@ -110,33 +105,6 @@ def to_bottom_left(x_tl, y_tl, frame_height):
     return x_tl, y_bl
 
 
-def _find_content_bottom_min_y_bl(frame, ocr_reader):
-    if ocr_reader is None:
-        return None
-    h, w = frame.shape[:2]
-    y_start = int(h * (1 - REPLAY_SEARCH_BOTTOM_FRACTION))
-    crop = frame[y_start:h, 0:w]
-    if crop.size == 0:
-        return None
-    result = ocr_reader.readtext(crop)
-    for (bbox, text, conf) in result:
-        if not text or "REPLAY" not in str(text).upper():
-            continue
-        try:
-            arr = np.array(bbox)
-            ys = arr[:, 1].tolist() if arr.ndim == 2 and arr.shape[1] >= 2 else []
-        except Exception:
-            pts = bbox if hasattr(bbox, "__iter__") and not isinstance(bbox, (str, dict)) else []
-            ys = [p[1] for p in pts if len(p) >= 2]
-        if ys:
-            replay_top_in_crop = min(ys)
-            replay_top_y = y_start + replay_top_in_crop
-            content_bottom_y = max(0, replay_top_y - REPLAY_LINE_MARGIN_PX)
-            min_valid_y_bl = (h - 1) - content_bottom_y
-            return min_valid_y_bl
-    return None
-
-
 def _video_basename_sanitized(video_path):
     base = os.path.splitext(os.path.basename(video_path))[0]
     return re.sub(r"[^\w\-.]", "_", base)
@@ -153,19 +121,9 @@ def process_video(video_path, output_csv_path=None, write_validation=True):
         cap.release()
         return None
     h, w = first_frame.shape[:2]
-    content_min_y_bl = None
-    if easyocr is not None:
-        try:
-            ocr_reader = easyocr.Reader(["en"], gpu=False, verbose=False)
-            content_min_y_bl = _find_content_bottom_min_y_bl(first_frame, ocr_reader)
-            if content_min_y_bl is not None:
-                print("  Content bottom from REPLAY OCR: min_y_bl =", round(content_min_y_bl, 1))
-            del ocr_reader
-        except Exception as e:
-            print("  OCR for content bottom failed:", e)
-    if content_min_y_bl is None:
-        content_min_y_bl = max(COPYRIGHT_LINE_HEIGHT + RED_BAR_HEIGHT, int(h * 0.22))
-        print("  Using fallback content bottom: min_y_bl =", content_min_y_bl)
+    # Gaze coordinates are intentionally pure OpenCV. Text/OCR work starts in step 2.
+    content_min_y_bl = max(COPYRIGHT_LINE_HEIGHT + RED_BAR_HEIGHT, int(h * 0.22))
+    print("  OpenCV content safety boundary: min_y_bl =", content_min_y_bl)
     # Never accept gaze in the operation bar band (bottom of frame, red-like UI)
     content_min_y_bl = max(content_min_y_bl, OPERATION_BAR_TOP_MARGIN_PX)
 

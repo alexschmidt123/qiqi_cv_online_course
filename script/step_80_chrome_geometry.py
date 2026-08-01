@@ -1,4 +1,4 @@
-"""
+"""Legacy slide-player geometry helpers.
 PPT / slide rectangle from **chrome geometry**:
 
 - Left/right **black pillarbox** columns (dark vertical runs beside the slide).

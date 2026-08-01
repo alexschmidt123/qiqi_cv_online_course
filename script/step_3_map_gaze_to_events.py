@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Map gaze coordinates to a pre-built element library and emit dwell events.
+"""Step 3: map gaze coordinates to the AI-built element library and emit dwell events.
 
 The expensive/semantic work happens once when element_library.json is created.
 This script is deterministic and can be reused for every participant recording.

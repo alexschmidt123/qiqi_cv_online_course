@@ -1,6 +1,7 @@
-# PPT gaze → element policy (authoritative)
+# Legacy PPT gaze → element policy
 
-This document matches **`scripts_image/step_2_detect_elements.py`** (`choose_element_for_gaze`, detectors, and helpers). Step 3 (GPT) and step 4 (validation) add behavior described in the last sections.
+This document matches `step_94_legacy_slide_detect_elements.py`. It describes
+the retired bucket-based detector retained in this folder for reproducibility.
 
 **Exported `element_name` values:** `heading`, `paragraph`, `button_text`, `button`, `image`, `navigation_bar`, `blank_area`, `none` (no gaze). Internal strip labels `button_1` … `button_bang` map to public **`button`**.
 

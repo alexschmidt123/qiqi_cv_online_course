@@ -1,4 +1,4 @@
-"""
+"""Legacy slide gaze wrapper; production uses step_1_detect_gaze.py.
 Step 1 (PPT / image videos): Red circle gaze per frame, bottom-left CSV.
 
 Same detector as script/step_1_detect_gaze.py, but PPT videos have no REPLAY line:

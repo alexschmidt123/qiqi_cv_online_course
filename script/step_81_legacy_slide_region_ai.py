@@ -1,4 +1,4 @@
-"""
+"""Legacy AI slide-region helper.
 One-shot PPT content rectangle via OpenAI vision (gpt-4o-mini).
 
 The rectangle uses top-left pixel coordinates (y down):
