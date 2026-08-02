@@ -4,14 +4,15 @@
 
 This project analyzes where a user looks while viewing an online course.
 
-- Article videos: OpenCV detects gaze, OCR reads text around the gaze, and AI
-  identifies the article text, layout, and section being viewed.
-- Slide videos: OpenCV finds unique slide and popup patterns, and AI identifies
-  their titles, paragraphs, figures, buttons, popups, and website elements.
+- Article videos: OpenCV detects gaze, OCR reads words around it, and NLP matches
+  those words to the reconstructed full article and its sections.
+- Slide videos: OpenCV matches slides and popup states to one shared course
+  library; AI identifies elements only when a previously unseen state appears.
 
-Each video produces one `attention_table.csv` report and sampled validation
-screenshots showing layout borders, the gaze point, the selected element, and the
-decision explanation.
+Article output contains `attention_table.csv`, `full_article.txt`, and sampled
+decision screenshots without section borders. Slide output contains the CSV and
+one validation screenshot per distinct slide or popup state. The reusable slide
+library is stored in `output/slide_standard_library/`.
 
 ## Installation
 

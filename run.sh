@@ -57,9 +57,12 @@ else
 fi
 [ "${#videos[@]}" -gt 0 ] || { echo "No videos found" >&2; exit 1; }
 
-if [ -z "${CONDA_DEFAULT_ENV:-}" ] && command -v conda >/dev/null 2>&1; then
+if [ "${CONDA_DEFAULT_ENV:-}" != "cv_env" ] && command -v conda >/dev/null 2>&1; then
   eval "$(conda shell.bash hook)" 2>/dev/null || true
-  conda activate cv_env 2>/dev/null || true
+  conda activate cv_env 2>/dev/null || {
+    echo "Could not activate required Conda environment: cv_env" >&2
+    exit 1
+  }
 fi
 
 for video in "${videos[@]}"; do
@@ -80,7 +83,12 @@ for video in "${videos[@]}"; do
     --gaze-csv "$outdir/debug/gaze_coordinates.internal" \
     --type "$VIDEO_TYPE" --model "$MODEL" --sample-interval "$SAMPLE_INTERVAL" \
     --ai-screenshots "$AI_SCREENSHOTS" \
+    --standard-library-dir "$ROOT/output/slide_standard_library" \
     > "$outdir/debug/step_2.log" 2>&1
+
+  if [ "$VIDEO_TYPE" = "article" ]; then
+    cp "$analysis_dir/full_article.txt" "$outdir/full_article.txt"
+  fi
 
   echo "[$video_id] 3/4 Chronological gaze and duration tables"
   python3 "$ROOT/script/step_3_map_gaze_to_events.py" \
@@ -89,6 +97,8 @@ for video in "${videos[@]}"; do
     --output "$outdir/attention_table.csv"
 
   echo "[$video_id] 4/4 Visual validation"
+  mkdir -p "$outdir/validation"
+  find "$outdir/validation" -maxdepth 1 -type f -name 'validation_*.png' -delete
   python3 "$ROOT/script/step_4_validate_attention.py" --video "$video" \
     --library "$analysis_dir/element_library.json" \
     --gaze-data "$outdir/debug/gaze_coordinates.internal" \

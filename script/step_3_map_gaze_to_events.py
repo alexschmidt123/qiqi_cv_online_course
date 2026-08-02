@@ -33,6 +33,7 @@ class State:
     content_id: str
     start_sec: float
     end_sec: float
+    course_roi: Tuple[Tuple[Point, ...], ...]
     elements: Tuple[Element, ...]
 
 
@@ -81,6 +82,10 @@ def load_library(path: Path) -> Tuple[int, int, List[State]]:
             content_id=str(raw_state.get("content_id") or raw_state.get("slide_id") or "unknown"),
             start_sec=float(raw_state["start_sec"]),
             end_sec=float(raw_state["end_sec"]),
+            course_roi=tuple(
+                tuple((float(x), float(y)) for x, y in polygon)
+                for polygon in raw_state.get("course_roi", [[[0.22, 0.17], [0.78, 0.17], [0.78, 0.73], [0.22, 0.73]]])
+            ),
             elements=tuple(elements),
         ))
     states.sort(key=lambda s: s.start_sec)
@@ -93,6 +98,8 @@ def _state_at(states: Sequence[State], timestamp: float) -> Optional[State]:
 
 
 def _element_at(state: State, nx: float, ny: float) -> Optional[Element]:
+    if state.course_roi and not any(_point_in_polygon(nx, ny, polygon) for polygon in state.course_roi):
+        return Element("unrelated_content", "outside_course", "unrelated content", tuple(), -1000)
     hits = []
     for element in state.elements:
         hit_areas = [_polygon_area(p) for p in element.polygons if _point_in_polygon(nx, ny, p)]
