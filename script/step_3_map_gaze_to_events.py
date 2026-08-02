@@ -30,7 +30,7 @@ class Element:
 @dataclass(frozen=True)
 class State:
     state_id: str
-    slide_id: str
+    content_id: str
     start_sec: float
     end_sec: float
     elements: Tuple[Element, ...]
@@ -78,7 +78,7 @@ def load_library(path: Path) -> Tuple[int, int, List[State]]:
             ))
         states.append(State(
             state_id=str(raw_state["state_id"]),
-            slide_id=str(raw_state["slide_id"]),
+            content_id=str(raw_state.get("content_id") or raw_state.get("slide_id") or "unknown"),
             start_sec=float(raw_state["start_sec"]),
             end_sec=float(raw_state["end_sec"]),
             elements=tuple(elements),
@@ -126,7 +126,10 @@ def label_gaze_rows(gaze_csv: Path, width: int, height: int, states: Sequence[St
                 element = _element_at(state, x / width, y_tl / height)
             labeled.append({
                 "timestamp_sec": ts,
-                "slide_id": state.slide_id if state else "none",
+                "gaze_x": x,
+                "gaze_y": y,
+                "gaze_location": f"({x:.3f}, {y:.3f})" if x is not None and y is not None else "none",
+                "content_id": state.content_id if state else "none",
                 "state_id": state.state_id if state else "none",
                 "element_id": element.element_id if element else "none",
                 "element_type": element.element_type if element else "none",
@@ -145,7 +148,7 @@ def build_events(rows: Sequence[Dict[str, Any]], user_id: str, min_duration: flo
     sample_period = positive[len(positive) // 2] if positive else 0.0
     events: List[Dict[str, Any]] = []
     start = 0
-    keys = ("slide_id", "state_id", "element_id")
+    keys = ("content_id", "state_id", "element_id")
     for i in range(1, len(valid) + 1):
         boundary = i == len(valid) or any(valid[i][k] != valid[start][k] for k in keys)
         if not boundary:
@@ -155,9 +158,10 @@ def build_events(rows: Sequence[Dict[str, Any]], user_id: str, min_duration: flo
         if duration >= min_duration:
             events.append({
                 "user_id": user_id,
-                "slide_id": first["slide_id"],
+                "content_id": first["content_id"],
                 "state_id": first["state_id"],
-                "time": round(first["timestamp_sec"], 6),
+                "time_point": round(first["timestamp_sec"], 6),
+                "gaze_location": first["gaze_location"],
                 "learning_element": first["learning_element"],
                 "element_type": first["element_type"],
                 "duration": round(duration, 6),
@@ -166,14 +170,31 @@ def build_events(rows: Sequence[Dict[str, Any]], user_id: str, min_duration: flo
     return events
 
 
-def write_csv(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
+def write_csv(path: Path, rows: Iterable[Dict[str, Any]], video_type: str) -> None:
     rows = list(rows)
-    fields = ["user_id", "slide_id", "state_id", "time", "learning_element", "element_type", "duration"]
+    if video_type == "article":
+        fields = ["time_point", "gaze_location", "section", "duration"]
+    else:
+        fields = ["time_point", "gaze_location", "slide_id", "element", "duration"]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
-        writer.writerows(rows)
+        for row in rows:
+            if video_type == "article":
+                writer.writerow({
+                    "time_point": row["time_point"], "gaze_location": row["gaze_location"],
+                    "section": row["learning_element"],
+                    "duration": row["duration"],
+                })
+            else:
+                writer.writerow({
+                    "time_point": row["time_point"], "gaze_location": row["gaze_location"],
+                    # The visible state is the exported slide ID. Popup variants therefore
+                    # receive distinct IDs such as slide_01_popup_button_1.
+                    "slide_id": row["state_id"],
+                    "element": row["learning_element"], "duration": row["duration"],
+                })
 
 
 def main() -> None:
@@ -185,9 +206,11 @@ def main() -> None:
     parser.add_argument("--origin", choices=("bottom-left", "top-left"), default="bottom-left")
     parser.add_argument("--min-duration", type=float, default=0.0)
     args = parser.parse_args()
+    library_data = json.loads(args.library.read_text(encoding="utf-8"))
+    video_type = str(library_data.get("video_type") or "slides")
     width, height, states = load_library(args.library)
     labeled = label_gaze_rows(args.gaze_csv, width, height, states, args.origin)
-    write_csv(args.output, build_events(labeled, args.user_id, args.min_duration))
+    write_csv(args.output, build_events(labeled, args.user_id, args.min_duration), video_type)
 
 
 if __name__ == "__main__":

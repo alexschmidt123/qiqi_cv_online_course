@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import csv
 import json
 import os
 import re
@@ -27,7 +28,7 @@ try:
 except ImportError:
     easyocr = None
 
-DEFAULT_MODEL = "gpt-5.6-sol"
+DEFAULT_MODEL = "gpt-4o-mini"
 COLORS = {
     "web_navigation": (255, 80, 40),
     "web_panel": (255, 180, 40),
@@ -45,6 +46,7 @@ COLORS = {
 @dataclass
 class Sample:
     sample_id: str
+    pattern_id: str
     timestamp: float
     frame: np.ndarray
     clean_frame: np.ndarray
@@ -79,19 +81,60 @@ def _visual_difference(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.mean(cv2.absdiff(prep(a), prep(b))))
 
 
-def _ocr_frame(reader: Any, frame: np.ndarray, width: int, height: int) -> List[Dict[str, Any]]:
+def _ocr_around_gaze(
+    reader: Any,
+    frame: np.ndarray,
+    width: int,
+    height: int,
+    gaze: Optional[Tuple[float, float]],
+) -> List[Dict[str, Any]]:
+    """OCR only the article text surrounding the gaze point, never the full frame."""
+    if gaze is None:
+        return []
     if reader is None:
         return []
+    gx, gy_tl = gaze
+    x0, x1 = max(0, int(gx) - 420), min(width, int(gx) + 420)
+    y0, y1 = max(0, int(gy_tl) - 240), min(height, int(gy_tl) + 240)
+    crop = frame[y0:y1, x0:x1]
+    if crop.size == 0:
+        return []
     rows = []
-    for bbox, text, confidence in reader.readtext(frame):
+    for bbox, text, confidence in reader.readtext(crop):
         if not str(text).strip() or float(confidence or 0) < 0.08:
             continue
-        points = [[round(float(x) / width, 5), round(float(y) / height, 5)] for x, y in bbox]
+        points = [[round((float(x) + x0) / width, 5), round((float(y) + y0) / height, 5)] for x, y in bbox]
         rows.append({"text": str(text).strip(), "confidence": round(float(confidence), 3), "polygon": points})
     return rows
 
 
-def collect_samples(video: Path, interval: float, change_threshold: float, max_samples: int) -> Tuple[int, int, float, List[Sample]]:
+def _load_gaze_by_time(path: Path, height: int) -> List[Tuple[float, float, float]]:
+    points = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            try:
+                ts, x, y_bl = float(row["timestamp_sec"]), float(row["x_bl"]), float(row["y_bl"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            points.append((ts, x, (height - 1) - y_bl))
+    return points
+
+
+def _nearest_gaze(points: Sequence[Tuple[float, float, float]], timestamp: float, tolerance: float) -> Optional[Tuple[float, float]]:
+    if not points:
+        return None
+    ts, x, y = min(points, key=lambda p: abs(p[0] - timestamp))
+    return (x, y) if abs(ts - timestamp) <= tolerance else None
+
+
+def collect_samples(
+    video: Path,
+    gaze_csv: Path,
+    video_type: str,
+    interval: float,
+    change_threshold: float,
+    max_samples: int,
+) -> Tuple[int, int, float, List[Sample]]:
     cap = cv2.VideoCapture(str(video))
     if not cap.isOpened():
         raise RuntimeError(f"Could not open video: {video}")
@@ -100,25 +143,40 @@ def collect_samples(video: Path, interval: float, change_threshold: float, max_s
     duration = count / fps if count else 0.0
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    reader = easyocr.Reader(["en"], gpu=False, verbose=False) if easyocr is not None else None
+    reader = easyocr.Reader(["en"], gpu=False, verbose=False) if video_type == "article" and easyocr is not None else None
+    gaze_points = _load_gaze_by_time(gaze_csv, height) if video_type == "article" else []
     samples: List[Sample] = []
-    previous: Optional[np.ndarray] = None
+    unique_patterns: List[Tuple[str, np.ndarray]] = []
+    previous_pattern = ""
     timestamps = np.arange(0.0, max(duration, interval), interval).tolist()
-    if len(timestamps) > max_samples:
+    if video_type == "article" and len(timestamps) > max_samples:
         timestamps = np.linspace(0.0, max(0.0, duration - 1.0 / fps), max_samples).tolist()
-    for index, timestamp in enumerate(timestamps):
+    for timestamp in timestamps:
         cap.set(cv2.CAP_PROP_POS_MSEC, timestamp * 1000.0)
         ok, frame = cap.read()
         if not ok or frame is None:
             continue
         clean = _remove_red_gaze(frame)
-        # Keep all scrolling samples; collapse nearly identical slide states.
-        diff = _visual_difference(previous, clean) if previous is not None else 999.0
-        if previous is not None and diff < change_threshold:
-            continue
         sample_id = f"sample_{len(samples) + 1:03d}"
-        samples.append(Sample(sample_id, float(timestamp), frame, clean, _ocr_frame(reader, clean, width, height)))
-        previous = clean
+        if video_type == "slides":
+            matches = [(diff, pid) for pid, representative in unique_patterns for diff in [_visual_difference(representative, clean)]]
+            best = min(matches) if matches else None
+            if best is not None and best[0] < change_threshold:
+                pattern_id = best[1]
+            elif len(unique_patterns) < max_samples:
+                pattern_id = f"pattern_{len(unique_patterns) + 1:03d}"
+                unique_patterns.append((pattern_id, clean.copy()))
+            else:
+                pattern_id = best[1] if best else "pattern_001"
+            # Record every transition, including revisits and out-of-order navigation.
+            if pattern_id == previous_pattern:
+                continue
+            previous_pattern = pattern_id
+            samples.append(Sample(sample_id, pattern_id, float(timestamp), frame, clean, []))
+        else:
+            gaze = _nearest_gaze(gaze_points, float(timestamp), max(interval, 0.5))
+            ocr = _ocr_around_gaze(reader, clean, width, height, gaze)
+            samples.append(Sample(sample_id, sample_id, float(timestamp), frame, clean, ocr))
     cap.release()
     if not samples:
         raise RuntimeError("No representative frames could be read")
@@ -145,17 +203,58 @@ def _extract_json(text: str) -> Dict[str, Any]:
         return json.loads(value[start : end + 1])
 
 
-def analyze_with_ai(video_name: str, samples: Sequence[Sample], model: str, requested_type: str) -> Dict[str, Any]:
+def _select_ai_screenshots(samples: Sequence[Sample], limit: int) -> List[Sample]:
+    """Choose a small, time-distributed set; AI never receives every sampled frame."""
+    if limit <= 0:
+        raise ValueError("ai screenshot limit must be positive")
+    if len(samples) <= limit:
+        return list(samples)
+    indices = np.linspace(0, len(samples) - 1, limit, dtype=int).tolist()
+    return [samples[i] for i in sorted(set(indices))]
+
+
+def analyze_with_ai(
+    video_name: str,
+    samples: Sequence[Sample],
+    model: str,
+    requested_type: str,
+    ai_screenshot_limit: int,
+) -> Dict[str, Any]:
     load_dotenv()
     if not os.environ.get("OPENAI_API_KEY", "").strip():
         raise RuntimeError("OPENAI_API_KEY is required for step 2 layout analysis")
-    evidence = {s.sample_id: {"timestamp_sec": s.timestamp, "ocr": s.ocr} for s in samples}
+    if requested_type == "slides":
+        # One screenshot for every globally unique base/popup state. Do not cap at six.
+        by_pattern: Dict[str, Sample] = {}
+        for sample in samples:
+            by_pattern.setdefault(sample.pattern_id, sample)
+        representatives = list(by_pattern.values())
+    else:
+        representatives = _select_ai_screenshots(samples, ai_screenshot_limit)
+    representative_ids = {s.sample_id for s in representatives}
+    # OCR is local and inexpensive. Keep it for all states so article text and slide
+    # labels are not lost, but send pixels for only a few pattern examples.
+    evidence = {
+        s.sample_id: {
+            "timestamp_sec": round(s.timestamp, 3),
+            "pattern_id": s.pattern_id,
+            "has_screenshot": s.sample_id in representative_ids,
+            "ocr": s.ocr,
+        }
+        for s in samples
+    }
     prompt = f"""
 Analyze representative screenshots from the online-course video {video_name!r}.
 Requested video type: {requested_type}. If it is auto, classify it as exactly "article" or "slides".
 
 OCR evidence (normalized top-left coordinates) follows. Correct OCR mistakes using the images:
 {json.dumps(evidence, ensure_ascii=False)}
+
+For article videos, only a few representative screenshots are attached and OCR contains only text
+around gaze points. Reconstruct the full article from those gaze-centered observations.
+For slide videos, OCR is intentionally empty and one screenshot is attached for every globally
+unique pattern_id, including popup states. Navigation may be out of order. Repeated visits reuse
+the same pattern_id. Define one semantic state per pattern_id.
 
 Return JSON only with this structure:
 {{
@@ -169,7 +268,7 @@ Return JSON only with this structure:
   "states": [
     {{
       "sample_id": "sample_001",
-      "slide_id": "stable logical slide/page id",
+      "content_id": "article id for articles, stable logical slide id for slides",
       "state_id": "unique id; popup/click result must be a separate state",
       "state_description": "",
       "elements": [
@@ -194,11 +293,14 @@ Rules:
 - For slides, include every distinct slide state. A popup revealed by a clickable button is a new
   state even when the base slide is unchanged. Give popup elements higher priority than covered content.
 - Do not treat the red gaze marker as content.
-- Produce one state for each supplied sample_id. Reuse slide_id when samples show the same base slide.
+- For articles, produce one state for each sample_id and assign its article section.
+- For slides, produce one state for each unique pattern_id and put that pattern_id in sample_id.
+  Reuse slide_id for popup variants of the same base slide.
 """
     content: List[Dict[str, Any]] = [{"type": "input_text", "text": prompt}]
-    for sample in samples:
-        content.append({"type": "input_text", "text": f"{sample.sample_id} at {sample.timestamp:.3f}s"})
+    for sample in representatives:
+        identity = sample.pattern_id if requested_type == "slides" else sample.sample_id
+        content.append({"type": "input_text", "text": f"{identity} at first occurrence {sample.timestamp:.3f}s"})
         content.append({"type": "input_image", "image_url": _jpeg_data_url(sample.clean_frame), "detail": "high"})
     client = OpenAI()
     response = client.responses.create(model=model, input=[{"role": "user", "content": content}])
@@ -252,7 +354,7 @@ def build_library(result: Dict[str, Any], samples: Sequence[Sample], width: int,
     by_id = {str(s.get("sample_id")): s for s in result.get("states", []) if isinstance(s, dict)}
     states = []
     for index, sample in enumerate(samples):
-        raw = by_id.get(sample.sample_id, {})
+        raw = by_id.get(sample.pattern_id) or by_id.get(sample.sample_id, {})
         end = samples[index + 1].timestamp if index + 1 < len(samples) else duration + 1e-6
         elements = []
         for number, element in enumerate(raw.get("elements", []), 1):
@@ -274,7 +376,8 @@ def build_library(result: Dict[str, Any], samples: Sequence[Sample], width: int,
             })
         states.append({
             "sample_id": sample.sample_id,
-            "slide_id": str(raw.get("slide_id") or sample.sample_id),
+            "pattern_id": sample.pattern_id,
+            "content_id": str(raw.get("content_id") or raw.get("slide_id") or ("article" if result.get("video_type") == "article" else sample.pattern_id)),
             "state_id": str(raw.get("state_id") or sample.sample_id),
             "state_description": str(raw.get("state_description") or ""),
             "start_sec": sample.timestamp,
@@ -293,10 +396,14 @@ def build_library(result: Dict[str, Any], samples: Sequence[Sample], width: int,
 def render_layout_images(samples: Sequence[Sample], library: Dict[str, Any], output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     sample_by_id = {s.sample_id: s for s in samples}
+    rendered = set()
     for state in library["states"]:
         sample = sample_by_id.get(state["sample_id"])
         if sample is None:
             continue
+        if state["state_id"] in rendered:
+            continue
+        rendered.add(state["state_id"])
         h, w = sample.clean_frame.shape[:2]
         canvas = cv2.addWeighted(sample.clean_frame, 0.5, np.full_like(sample.clean_frame, 255), 0.5, 0)
         for element in state["elements"]:
@@ -327,16 +434,25 @@ def write_report(result: Dict[str, Any], library: Dict[str, Any], output_dir: Pa
 def main() -> None:
     parser = argparse.ArgumentParser(description="AI video classification, semantic layout library, and report")
     parser.add_argument("--video", required=True, type=Path)
+    parser.add_argument("--gaze-csv", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--type", choices=("auto", "article", "slides"), default="auto")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--sample-interval", type=float, default=2.0)
     parser.add_argument("--change-threshold", type=float, default=2.0)
-    parser.add_argument("--max-samples", type=int, default=24)
+    parser.add_argument("--max-samples", type=int, default=80, help="Maximum article observations or unique slide patterns")
+    parser.add_argument(
+        "--ai-screenshots",
+        type=int,
+        default=6,
+        help="Maximum representative screenshots sent to AI; OCR may cover more local samples.",
+    )
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    width, height, duration, samples = collect_samples(args.video, args.sample_interval, args.change_threshold, args.max_samples)
-    result = analyze_with_ai(args.video.name, samples, args.model, args.type)
+    width, height, duration, samples = collect_samples(
+        args.video, args.gaze_csv, args.type, args.sample_interval, args.change_threshold, args.max_samples
+    )
+    result = analyze_with_ai(args.video.name, samples, args.model, args.type, args.ai_screenshots)
     if args.type != "auto":
         result["video_type"] = args.type
     library = build_library(result, samples, width, height, duration)

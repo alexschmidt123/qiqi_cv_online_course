@@ -217,6 +217,7 @@ def main():
     parser.add_argument("--video", type=str, default=None, help="Single video path (default: process all in --video-dir)")
     parser.add_argument("--video-dir", type=str, default=VIDEO_DIR, help="Directory with .mp4/.mov when not using --video")
     parser.add_argument("--output-dir", type=str, default=None, help="Per-video output folder when using --video; else output/ under project root")
+    parser.add_argument("--output-name", type=str, default="gaze_coordinates.csv", help="Internal gaze data filename")
     parser.add_argument("--no-validation", action="store_true", help="Do not write _validation.txt per video")
     args = parser.parse_args()
 
@@ -231,7 +232,7 @@ def main():
         if True:
             os.makedirs(out_dir, exist_ok=True)
             print("\n---", os.path.basename(args.video), "---")
-            csv_path = os.path.join(out_dir, "gaze_coordinates.csv")
+            csv_path = os.path.join(out_dir, args.output_name)
             stats = process_video(args.video, output_csv_path=csv_path, write_validation=not args.no_validation)
             if stats:
                 print("  Wrote", stats["total_frames"], "rows to", stats["csv_path"])
@@ -259,7 +260,7 @@ def main():
         outdir = os.path.join(out_root, name)
         os.makedirs(outdir, exist_ok=True)
         print("\n---", os.path.basename(vpath), "---")
-        csv_path = os.path.join(outdir, "gaze_coordinates.csv")
+        csv_path = os.path.join(outdir, args.output_name)
         stats = process_video(vpath, output_csv_path=csv_path, write_validation=not args.no_validation)
         if stats:
             print("  Wrote", stats["total_frames"], "rows to", stats["csv_path"])

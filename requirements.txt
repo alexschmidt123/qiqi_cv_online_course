@@ -1,8 +1,12 @@
-# Gaze-to-section pipeline (online course videos)
-opencv-python>=4.5.0
-numpy>=1.19.0
-easyocr>=1.7.0
+# Python 3.11
 
-# Step 2: Responses API vision/layout analysis and report generation
-openai>=1.109.0
-python-dotenv>=1.0.0
+# OpenCV gaze detection, screenshot sampling, and validation rendering
+numpy>=2.0,<3.0
+opencv-python>=4.12,<5.0
+
+# Article-only OCR around gaze points
+easyocr>=1.7.2,<2.0
+
+# AI layout analysis through the Responses API
+openai>=2.23,<3.0
+python-dotenv>=1.0,<2.0
