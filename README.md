@@ -6,13 +6,14 @@ This project analyzes where a user looks while viewing an online course.
 
 - Article videos: OpenCV detects gaze, OCR reads words around it, and NLP matches
   those words to the reconstructed full article and its sections.
-- Slide videos: OpenCV matches slides and popup states to one shared course
-  library; AI identifies elements only when a previously unseen state appears.
+- Slide videos: OpenCV matches slides and popup states to one frozen shared
+decision library. Every output decision must be selected from that library;
+  an unmatched state stops the run instead of creating a new decision.
 
 Article output contains `attention_table.csv`, `full_article.txt`, and sampled
 decision screenshots without section borders. Slide output contains the CSV and
-one validation screenshot per distinct slide or popup state. The reusable slide
-library is stored in `output/slide_standard_library/`.
+one validation screenshot per distinct slide or popup state. The prepared,
+CSV-only slide library is stored in `data/slide_standard_library/`.
 
 ## Installation
 
@@ -44,6 +45,14 @@ Process all slide videos:
 
 ```bash
 bash run.sh -dir data/video_slide
+```
+
+For slide runs, `run.sh` automatically prepares the shared library when it is
+missing or incomplete and skips preparation when all 22+ slide entries and
+their files pass validation. Force a rebuild with:
+
+```bash
+bash run.sh -dir data/video_slide/R4_P1.mp4 -prepare-slide-library -model gpt-4o
 ```
 
 Process one slide video:
