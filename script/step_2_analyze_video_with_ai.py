@@ -11,10 +11,11 @@ from __future__ import annotations
 import argparse
 import base64
 import csv
-import difflib
 import json
 import os
 import re
+import unicodedata
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -44,6 +45,11 @@ COLORS = {
 }
 
 
+def _display_text(value: str) -> str:
+    value = value.replace("’", "'").replace("“", '"').replace("”", '"').replace("…", "...")
+    return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+
+
 @dataclass
 class Sample:
     sample_id: str
@@ -57,6 +63,10 @@ class Sample:
 
 def _rect_polygon(x0: float, y0: float, x1: float, y1: float) -> List[List[float]]:
     return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+
+
+def _ellipse_polygon(cx: float, cy: float, rx: float, ry: float, points: int = 24) -> List[List[float]]:
+    return [[cx + rx * float(np.cos(2 * np.pi * i / points)), cy + ry * float(np.sin(2 * np.pi * i / points))] for i in range(points)]
 
 
 def _locate_content_roi(frame: np.ndarray, video_type: str) -> List[List[float]]:
@@ -107,7 +117,7 @@ def _crop_to_roi(frame: np.ndarray, roi: Sequence[Sequence[float]]) -> np.ndarra
     return frame[y0:y1, x0:x1]
 
 
-def _remove_red_gaze(frame: np.ndarray) -> np.ndarray:
+def _remove_red_gaze(frame: np.ndarray, gaze: Optional[Tuple[float, float]] = None) -> np.ndarray:
     """Remove the red gaze marker from screenshots before state comparison/AI."""
     out = frame.copy()
     hsv = cv2.cvtColor(out, cv2.COLOR_BGR2HSV)
@@ -115,13 +125,13 @@ def _remove_red_gaze(frame: np.ndarray) -> np.ndarray:
         cv2.inRange(hsv, np.array([0, 115, 70]), np.array([12, 255, 255])),
         cv2.inRange(hsv, np.array([168, 115, 70]), np.array([180, 255, 255])),
     )
-    n, labels, stats, _ = cv2.connectedComponentsWithStats(mask)
     gaze_mask = np.zeros(mask.shape, dtype=np.uint8)
-    for i in range(1, n):
-        x, y, w, h, area = stats[i]
-        ratio = min(w, h) / max(w, h) if max(w, h) else 0
-        if 25 <= area <= 3500 and ratio >= 0.45:
-            gaze_mask[labels == i] = 255
+    if gaze is not None:
+        # Step 1 already located the gaze marker. Restrict removal to that
+        # neighborhood so pink/red slide titles and diagram content survive.
+        local = np.zeros(mask.shape, dtype=np.uint8)
+        cv2.circle(local, (round(gaze[0]), round(gaze[1])), 34, 255, -1)
+        gaze_mask = cv2.bitwise_and(mask, local)
     if np.any(gaze_mask):
         gaze_mask = cv2.dilate(gaze_mask, np.ones((7, 7), np.uint8), iterations=1)
         out = cv2.inpaint(out, gaze_mask, 5, cv2.INPAINT_TELEA)
@@ -204,7 +214,7 @@ def collect_samples(
         raise RuntimeError("Could not read a frame for content ROI detection")
     course_roi = _locate_content_roi(roi_frame, video_type)
     reader = easyocr.Reader(["en"], gpu=False, verbose=False) if video_type == "article" and easyocr is not None else None
-    gaze_points = _load_gaze_by_time(gaze_csv, height) if video_type == "article" else []
+    gaze_points = _load_gaze_by_time(gaze_csv, height) if gaze_csv.exists() else []
     samples: List[Sample] = []
     unique_patterns: List[Tuple[str, np.ndarray]] = []
     previous_pattern = ""
@@ -216,7 +226,8 @@ def collect_samples(
         ok, frame = cap.read()
         if not ok or frame is None:
             continue
-        clean = _remove_red_gaze(frame)
+        gaze = _nearest_gaze(gaze_points, float(timestamp), max(interval, 0.5))
+        clean = _remove_red_gaze(frame, gaze)
         sample_id = f"sample_{len(samples) + 1:03d}"
         if video_type == "slides":
             matches = [(diff, pid) for pid, representative in unique_patterns for diff in [_visual_difference(representative, clean, course_roi)]]
@@ -234,7 +245,6 @@ def collect_samples(
             previous_pattern = pattern_id
             samples.append(Sample(sample_id, pattern_id, float(timestamp), frame, clean, [], None))
         else:
-            gaze = _nearest_gaze(gaze_points, float(timestamp), max(interval, 0.5))
             ocr = _ocr_around_gaze(reader, clean, width, height, gaze)
             samples.append(Sample(sample_id, sample_id, float(timestamp), frame, clean, ocr, gaze))
     cap.release()
@@ -376,6 +386,11 @@ Rules:
   paragraph, image, button, or popup. The whole-crop polygon is allowed only for blank_area.
 - Keep title, body paragraph, figure, each button, and each visible popup as separate elements.
   A popup polygon must tightly cover the popup panel and use element_type popup with priority >= 100.
+- Trace actual visible boundaries. Do not draw diagonal edges around rectangular content. Use a
+  four-corner rectangle for rectangular text, images, panels, and popups. Include the full visible
+  text block, not a small excerpt, and never cover a different neighboring element.
+- Preserve the real shape of non-rectangular elements. Use 8-16 boundary points for circles,
+  curved buttons, diagrams, and irregular or concave figures; never replace them with a bounding box.
 - Do not treat the red gaze marker as content.
 - For articles, produce one state for each sample_id and assign its article section.
 - For slides, produce one state for each unique pattern_id and put that pattern_id in sample_id.
@@ -408,34 +423,28 @@ def _normalize_polygon(raw: Any) -> List[List[float]]:
 def _article_section_assignments(result: Dict[str, Any], samples: Sequence[Sample]) -> Dict[str, str]:
     article = result.get("article") or {}
     full_text = str(article.get("full_text") or "")
-    normalized_full = " ".join(full_text.lower().split())
     title = str(article.get("title") or "article title")
-    sections: List[Tuple[float, str]] = []
-    offset = 0
-    for line in full_text.splitlines(True):
-        label = line.strip().rstrip(":")
-        letters = [c for c in label if c.isalpha()]
-        if len(letters) >= 3 and (line.strip().endswith(":") or all(c.isupper() for c in letters)):
-            sections.append((offset / max(1, len(full_text)), label))
-        offset += len(line)
-    assignments, previous = {}, title
+    heading_pattern = re.compile(r"(?m)^([A-Z][A-Z ]{2,}):\s*")
+    matches = list(heading_pattern.finditer(full_text))
+    choices: List[Tuple[str, str]] = [(title, full_text[:matches[0].start()] if matches else full_text)]
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(full_text)
+        choices.append((match.group(1).strip(), full_text[match.end():end]))
+
+    stop = {"the", "a", "an", "and", "or", "to", "of", "in", "is", "it", "that", "this", "for", "with", "on", "be", "as"}
+    def tokens(text: str) -> set[str]:
+        return {word for word in re.findall(r"[a-z0-9]+", text.lower()) if len(word) > 2 and word not in stop}
+    choice_tokens = [(label, tokens(body)) for label, body in choices]
+    assignments = {}
     for sample in samples:
-        positions = []
-        for item in sample.ocr:
-            observed = " ".join(str(item.get("text") or "").lower().split())
-            if len(observed) < 8 or not normalized_full:
-                continue
-            match = difflib.SequenceMatcher(None, normalized_full, observed, autojunk=False).find_longest_match()
-            if match.size >= min(12, max(8, len(observed) // 2)):
-                positions.append(match.a / max(1, len(normalized_full)))
-        if positions:
-            fraction = float(np.median(positions))
-            # Pure NLP decision: locate gaze-near OCR words in the reconstructed
-            # article and select the preceding semantic heading. No image position
-            # or scroll direction participates in this decision.
-            candidates = [label for position, label in sections if position <= fraction]
-            previous = candidates[-1] if candidates else title
-        assignments[sample.sample_id] = previous
+        observed = " ".join(str(item.get("text") or "") for item in sample.ocr)
+        observed_tokens = tokens(observed)
+        scores = []
+        for label, section_tokens in choice_tokens:
+            overlap = len(observed_tokens & section_tokens)
+            score = overlap / max(1.0, np.sqrt(len(section_tokens)))
+            scores.append((score, label))
+        assignments[sample.sample_id] = max(scores, default=(0.0, title))[1] if observed_tokens else title
     return assignments
 
 
@@ -529,7 +538,7 @@ def render_layout_images(samples: Sequence[Sample], library: Dict[str, Any], out
                 points = np.array([[round(x * w), round(y * h)] for x, y in polygon], dtype=np.int32)
                 cv2.polylines(canvas, [points], True, color, 4, cv2.LINE_AA)
                 x, y = points[0]
-                cv2.putText(canvas, element["label"][:50], (int(x), max(18, int(y) - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2, cv2.LINE_AA)
+                cv2.putText(canvas, _display_text(element["label"])[:50], (int(x), max(18, int(y) - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2, cv2.LINE_AA)
         cv2.imwrite(str(output_dir / f"{state['state_id']}.png"), canvas)
 
 
@@ -556,21 +565,73 @@ def _crop_difference(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.mean(cv2.absdiff(prep(a), prep(b))))
 
 
+def _library_regions(regions: Sequence[Dict[str, Any]]) -> List[List[List[float]]]:
+    polygons = []
+    for region in regions:
+        if region.get("shape") == "rectangle":
+            x0, x1 = region["x_min"], region["x_max"]
+            y0, y1 = region["y_min"], region["y_max"]
+            polygons.append(_rect_polygon(float(x0), float(y0), float(x1), float(y1)))
+        elif region.get("shape") == "polygon":
+            polygon = _normalize_polygon(region.get("points"))
+            if polygon:
+                polygons.append(polygon)
+    return polygons
+
+
+def _read_slide_csv_library(standard_dir: Path) -> List[Dict[str, Any]]:
+    manifest = standard_dir / "slides.csv"
+    if not manifest.exists():
+        raise RuntimeError(f"Prepared slide library not found: {manifest}")
+    slides = []
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        for slide in csv.DictReader(handle):
+            decisions: Dict[str, Dict[str, Any]] = {}
+            table = standard_dir / "elements" / slide["element_table"]
+            with table.open(newline="", encoding="utf-8") as element_handle:
+                for row in csv.DictReader(element_handle):
+                    key = row["element_id"]
+                    item = decisions.setdefault(key, {
+                        "element_id": key, "element_type": row["element_type"],
+                        "label": row["decision"], "priority": int(row["priority"]), "polygons": [],
+                    })
+                    if row["shape"] == "rectangle":
+                        item["polygons"].append(_rect_polygon(
+                            float(row["x_min"]), float(row["y_min"]),
+                            float(row["x_max"]), float(row["y_max"]),
+                        ))
+                    elif row["shape"] == "ellipse":
+                        item["polygons"].append(_ellipse_polygon(
+                            float(row["center_x"]), float(row["center_y"]),
+                            float(row["radius_x"]), float(row["radius_y"]),
+                        ))
+                    else:
+                        points = [[float(v) for v in pair.split(":")] for pair in row["points"].split(";") if pair]
+                        if len(points) >= 3:
+                            item["polygons"].append(points)
+            slides.append({
+                "slide_id": slide["slide_id"], "description": slide["description"],
+                "reference_images": (slide.get("reference_images") or slide.get("reference_image") or "").split(";"),
+                "elements": list(decisions.values()),
+            })
+    return slides
+
+
 def analyze_slides_with_standard_library(
     video_name: str, samples: Sequence[Sample], model: str, course_roi: Sequence[Sequence[float]],
     standard_dir: Path, match_threshold: float = 3.0,
 ) -> Dict[str, Any]:
-    """Match participant states to one course-level slide library, extending it only when needed."""
+    """Select participant states from the frozen course-level decision library."""
     standard_dir.mkdir(parents=True, exist_ok=True)
     template_dir = standard_dir / "templates"
     template_dir.mkdir(parents=True, exist_ok=True)
-    catalog_path = standard_dir / "standard_library.json"
-    catalog = json.loads(catalog_path.read_text(encoding="utf-8")) if catalog_path.exists() else {"states": []}
+    catalog = _read_slide_csv_library(standard_dir)
     templates = []
-    for state in catalog.get("states", []):
-        image = cv2.imread(str(template_dir / state["template"]))
-        if image is not None:
-            templates.append((state, image))
+    for state in catalog:
+        for filename in state["reference_images"]:
+            image = cv2.imread(str(standard_dir / "references" / filename))
+            if image is not None:
+                templates.append((state, image))
 
     by_pattern: Dict[str, Sample] = {}
     for sample in samples:
@@ -587,38 +648,146 @@ def analyze_slides_with_standard_library(
             unmatched.append(sample)
 
     if unmatched:
-        learned = analyze_with_ai(video_name, unmatched, model, "slides", 6, course_roi)
-        learned_by_id = {str(s.get("sample_id")): s for s in learned.get("states", [])}
-        next_number = len(catalog.get("states", [])) + 1
-        for sample in unmatched:
-            raw = learned_by_id.get(sample.pattern_id, {})
-            standard_id = f"slide_{next_number:03d}"
-            filename = f"{standard_id}.png"
-            cv2.imwrite(str(template_dir / filename), _crop_to_roi(sample.clean_frame, course_roi))
-            standard_state = {
-                "standard_id": standard_id,
-                "content_id": standard_id,
-                "state_description": str(raw.get("state_description") or ""),
-                "elements": list(raw.get("elements") or []),
-                "template": filename,
-            }
-            catalog.setdefault("states", []).append(standard_state)
-            templates.append((standard_state, cv2.imread(str(template_dir / filename))))
-            matched[sample.pattern_id] = standard_state
-            next_number += 1
-        catalog_path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        details = ", ".join(f"{sample.pattern_id}@{sample.timestamp:.3f}s" for sample in unmatched)
+        raise RuntimeError(
+            "Slide decision must be selected from the frozen standard library; "
+            f"no permitted match was found for: {details}. Update the library separately before rerunning."
+        )
 
     states = []
     for pattern_id in by_pattern:
         standard = matched[pattern_id]
         states.append({
             "sample_id": pattern_id,
-            "content_id": standard["content_id"],
-            "state_id": standard["standard_id"],
-            "state_description": standard.get("state_description", ""),
-            "elements": standard.get("elements", []),
+            "content_id": standard["slide_id"],
+            "state_id": standard["slide_id"],
+            "state_description": standard.get("description", ""),
+            "elements": standard["elements"],
         })
     return {"video_type": "slides", "summary": "States matched to the shared course slide library.", "article": {}, "states": states}
+
+
+def prepare_slide_standard_library(
+    video_name: str, samples: Sequence[Sample], model: str,
+    course_roi: Sequence[Sequence[float]], standard_dir: Path, merge_threshold: float = 3.0,
+) -> None:
+    """Pre-operation: merge duplicates, learn elements, and write a CSV-only library."""
+    representatives: List[Sample] = []
+    variants: Dict[str, List[Sample]] = {}
+    for sample in samples:
+        crop = _crop_to_roi(sample.clean_frame, course_roi)
+        matches = [(_crop_difference(crop, _crop_to_roi(other.clean_frame, course_roi)), other) for other in representatives]
+        best = min(matches, key=lambda item: item[0]) if matches else None
+        if best is None or best[0] > merge_threshold:
+            representatives.append(sample)
+            variants[sample.pattern_id] = [sample]
+        else:
+            variants[best[1].pattern_id].append(sample)
+    if len(representatives) < 22:
+        raise RuntimeError(f"Only {len(representatives)} unique slide states found; at least 22 are required")
+
+    learned_by_id: Dict[str, Dict[str, Any]] = {}
+    # One screenshot per vision task avoids cross-slide coordinate confusion.
+    def learn_one(sample: Sample) -> Tuple[str, Dict[str, Any]]:
+        state: Dict[str, Any] = {}
+        for _ in range(3):
+            result = analyze_with_ai(video_name, [sample], model, "slides", 1, course_roi)
+            state = next(iter(result.get("states", [])), {})
+            if any(
+                str(element.get("element_type")) != "blank_area"
+                and any(_normalize_polygon(polygon) for polygon in element.get("polygons", []))
+                for element in state.get("elements", [])
+            ):
+                return sample.pattern_id, state
+        raise RuntimeError(f"AI returned no elements for {sample.pattern_id} after three attempts")
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [executor.submit(learn_one, sample) for sample in representatives]
+        for future in as_completed(futures):
+            pattern_id, state = future.result()
+            learned_by_id[pattern_id] = state
+    references = standard_dir / "references"
+    templates = standard_dir / "templates"
+    elements_dir = standard_dir / "elements"
+    for directory in (references, templates, elements_dir):
+        directory.mkdir(parents=True, exist_ok=True)
+        for stale in directory.iterdir():
+            if stale.is_file():
+                stale.unlink()
+    manifest_rows = []
+    colors = {key: value for key, value in COLORS.items()}
+    for number, sample in enumerate(representatives, 1):
+        slide_id = f"slide_{number:03d}"
+        raw = learned_by_id.get(sample.pattern_id, {})
+        crop = _crop_to_roi(sample.clean_frame, course_roi)
+        template_name, table_name = f"{slide_id}.png", f"{slide_id}.csv"
+        reference_names = []
+        for variant_number, variant in enumerate(variants[sample.pattern_id], 1):
+            reference_name = f"{slide_id}_ref_{variant_number:02d}.png"
+            cv2.imwrite(str(references / reference_name), _crop_to_roi(variant.clean_frame, course_roi))
+            reference_names.append(reference_name)
+        canvas = cv2.addWeighted(crop, 0.5, np.full_like(crop, 255), 0.5, 0)
+        rows = []
+        raw_elements = list(raw.get("elements") or [])
+        if not any(str(e.get("element_type")) == "blank_area" for e in raw_elements):
+            raw_elements.append({
+                "element_id": f"{slide_id}_blank", "element_type": "blank_area",
+                "label": "blank area", "priority": -100,
+                "polygons": [[[0, 0], [1, 0], [1, 1], [0, 1]]],
+            })
+        h, w = crop.shape[:2]
+        for element_number, element in enumerate(raw_elements, 1):
+            element_id = f"{slide_id}_element_{element_number:02d}"
+            element_type = str(element.get("element_type") or "blank_area")
+            label = str(element.get("label") or element_type)
+            priority = int(element.get("priority") or 0)
+            for polygon in element.get("polygons", []):
+                polygon = _normalize_polygon(polygon)
+                if not polygon:
+                    continue
+                xs, ys = [p[0] for p in polygon], [p[1] for p in polygon]
+                corners = {
+                    (min(xs), min(ys)), (max(xs), min(ys)),
+                    (max(xs), max(ys)), (min(xs), max(ys)),
+                }
+                # Only a truly axis-aligned four-corner region is a rectangle.
+                # Every other boundary is preserved as a polygon.
+                is_rect = len(polygon) == 4 and {(x, y) for x, y in polygon} == corners
+                is_ellipse = element_type == "button" and 0.5 <= (max(xs) - min(xs)) / max(1e-6, max(ys) - min(ys)) <= 2.0
+                if is_ellipse:
+                    polygon = _ellipse_polygon(
+                        (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2,
+                        (max(xs) - min(xs)) / 2, (max(ys) - min(ys)) / 2,
+                    )
+                rows.append({
+                    "element_id": element_id, "decision": label, "element_type": element_type,
+                    "priority": priority, "shape": "ellipse" if is_ellipse else ("rectangle" if is_rect else "polygon"),
+                    "x_min": round(min(xs), 4) if is_rect and not is_ellipse else "", "x_max": round(max(xs), 4) if is_rect and not is_ellipse else "",
+                    "y_min": round(min(ys), 4) if is_rect and not is_ellipse else "", "y_max": round(max(ys), 4) if is_rect and not is_ellipse else "",
+                    "center_x": round((min(xs) + max(xs)) / 2, 4) if is_ellipse else "",
+                    "center_y": round((min(ys) + max(ys)) / 2, 4) if is_ellipse else "",
+                    "radius_x": round((max(xs) - min(xs)) / 2, 4) if is_ellipse else "",
+                    "radius_y": round((max(ys) - min(ys)) / 2, 4) if is_ellipse else "",
+                    "points": "" if is_rect or is_ellipse else ";".join(f"{x:.4f}:{y:.4f}" for x, y in polygon),
+                })
+                if element_type != "blank_area":
+                    pts = np.array([[round(x * w), round(y * h)] for x, y in polygon], np.int32)
+                    color = colors.get(element_type, (0, 0, 0))
+                    cv2.polylines(canvas, [pts], True, color, 7, cv2.LINE_AA)
+                    tx, ty = pts[0]
+                    cv2.putText(canvas, _display_text(label)[:45], (int(tx), max(25, int(ty) - 8)),
+                                cv2.FONT_HERSHEY_SIMPLEX, .65, color, 2, cv2.LINE_AA)
+        fields = ["element_id", "decision", "element_type", "priority", "shape", "x_min", "x_max", "y_min", "y_max", "center_x", "center_y", "radius_x", "radius_y", "points"]
+        with (elements_dir / table_name).open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
+        cv2.imwrite(str(templates / template_name), canvas)
+        manifest_rows.append({
+            "slide_id": slide_id, "description": str(raw.get("state_description") or ""),
+            "reference_images": ";".join(reference_names), "template_image": template_name, "element_table": table_name,
+        })
+    with (standard_dir / "slides.csv").open("w", newline="", encoding="utf-8") as handle:
+        fields = ["slide_id", "description", "reference_images", "template_image", "element_table"]
+        writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(manifest_rows)
+    print(f"Prepared {len(representatives)} merged slide states in {standard_dir}")
 
 
 def main() -> None:
@@ -627,6 +796,7 @@ def main() -> None:
     parser.add_argument("--gaze-csv", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--standard-library-dir", type=Path)
+    parser.add_argument("--prepare-slide-library", action="store_true")
     parser.add_argument("--type", choices=("auto", "article", "slides"), default="auto")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--sample-interval", type=float, default=2.0)
@@ -648,6 +818,11 @@ def main() -> None:
     width, height, duration, samples, course_roi = collect_samples(
         args.video, args.gaze_csv, args.type, args.sample_interval, args.change_threshold, args.max_samples
     )
+    if args.prepare_slide_library:
+        if args.type != "slides" or not args.standard_library_dir:
+            raise RuntimeError("--prepare-slide-library requires --type slides and --standard-library-dir")
+        prepare_slide_standard_library(args.video.name, samples, args.model, course_roi, args.standard_library_dir)
+        return
     if args.type == "slides" and args.standard_library_dir:
         result = analyze_slides_with_standard_library(
             args.video.name, samples, args.model, course_roi, args.standard_library_dir

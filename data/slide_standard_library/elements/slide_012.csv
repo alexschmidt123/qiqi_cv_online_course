@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_012_element_01,Explore the Cell Cycle,slide_title,0,polygon,,,,,,,,,0.1000:0.0300;0.6000:0.1000;0.6000:0.2000;0.1000:0.2000
+slide_012_element_02,Click each icon to learn more about each part of the cell cycle.,paragraph,0,polygon,,,,,,,,,0.1000:0.2000;1.0000:0.3000;1.0000:0.3500;0.1000:0.3500
+slide_012_element_03,"S Phase (synthesis): In S phase, the cell synthesizes a complete copy of the DNA in the nucleus...",popup,100,polygon,,,,,,,,,0.0000:0.3000;0.3000:0.5000;0.3000:0.6000;0.0000:0.6000
+slide_012_element_04,"Diagram of cell cycle phases: G1, S, G2, and Mitotic phase.",image,0,polygon,,,,,,,,,0.3000:0.4000;0.9000:0.8000;0.9000:1.0000;0.3000:1.0000
+slide_012_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

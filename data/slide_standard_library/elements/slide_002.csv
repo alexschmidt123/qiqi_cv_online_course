@@ -1,0 +1,8 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_002_element_01,Allie's Treatment,slide_title,0,polygon,,,,,,,,,0.0520:0.0290;0.9480:0.0770;0.9480:0.1380;0.0520:0.1380
+slide_002_element_02,Click through Allie's case to learn more about her treatment.,paragraph,0,polygon,,,,,,,,,0.0520:0.1540;0.9480:0.1920;0.9480:0.2230;0.0520:0.2230
+slide_002_element_03,Image of medical consultation,image,0,polygon,,,,,,,,,0.0520:0.2460;0.4400:0.7040;0.4400:0.9370;0.0520:0.6080
+slide_002_element_04,"Treatment Questions
+“This 6-MP—how does it work? How is it going to help her?” Allie’s mom asked.
+“That’s a great question.” Dr. Harris replied. “To explain how 6-MP works, it’s important to understand something called the cell cycle.”",paragraph,0,polygon,,,,,,,,,0.5000:0.2460;0.9480:0.6080;0.9480:0.9370;0.5000:0.7040
+slide_002_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

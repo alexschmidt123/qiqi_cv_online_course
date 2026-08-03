@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_021_element_01,"Apoptosis (optional, like an emergency exit)",slide_title,0,polygon,,,,,,,,,0.0010:0.0010;0.9990:0.1200;0.9990:0.1800;0.0010:0.1800
+slide_021_element_02,"Purpose: If a cell has too many problems or is damaged beyond repair, it might choose to self-destruct.",paragraph,0,polygon,,,,,,,,,0.0010:0.1800;0.9990:0.2200;0.9990:0.2600;0.0010:0.2600
+slide_021_element_03,Check: The cell evaluates its own health and decides if it's better to sacrifice itself for the greater good.,paragraph,0,polygon,,,,,,,,,0.0010:0.2600;0.9990:0.3400;0.9990:0.3800;0.0010:0.3800
+slide_021_element_04,"Decision: If the cell chooses apoptosis, it breaks down in a controlled way.",paragraph,0,polygon,,,,,,,,,0.0010:0.3800;0.9990:0.4800;0.9990:0.5200;0.0010:0.5200
+slide_021_element_05,Cell cycle diagram,image,0,polygon,,,,,,,,,0.0010:0.5200;0.9990:0.9500;0.9990:0.9900;0.0010:0.9900
+slide_021_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

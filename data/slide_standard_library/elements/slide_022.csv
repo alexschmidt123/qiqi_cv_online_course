@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_022_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.3600:0.0500;0.6400:0.1000;0.6400:0.1500;0.3600:0.1500
+slide_022_element_02,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you're ready to test your knowledge.,paragraph,0,polygon,,,,,,,,,0.2700:0.1700;0.7300:0.2200;0.7300:0.2700;0.2700:0.2700
+slide_022_element_03,Diagram of cell cycle phases.,image,0,polygon,,,,,,,,,0.0800:0.2900;0.5500:0.7000;0.5500:0.9000;0.0800:0.9000
+slide_022_element_04,G1 checkpoint details.,popup,100,polygon,,,,,,,,,0.5500:0.4200;0.9700:0.8200;0.9700:0.9200;0.5500:0.9200
+slide_022_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

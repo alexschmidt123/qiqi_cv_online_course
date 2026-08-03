@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_018_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.1200:0.0500;0.8800:0.1200;0.8800:0.1800;0.1200:0.1800
+slide_018_element_02,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,polygon,,,,,,,,,0.1200:0.1800;0.8800:0.2200;0.8800:0.2800;0.1200:0.2800
+slide_018_element_03,G1 checkpoint information panel,web_panel,0,polygon,,,,,,,,,0.6000:0.3000;0.9300:0.4500;0.9300:0.6000;0.6000:0.6000
+slide_018_element_04,Diagram of cell cycle with interactive icons,image,0,polygon,,,,,,,,,0.1000:0.2800;0.5000:0.7500;0.9000:0.7500;0.9000:0.2800
+slide_018_element_05,Interactive buttons with numbers for checkpoints,button,0,ellipse,,,,,0.7200,0.3800,0.0200,0.0400,
+slide_018_element_05,Interactive buttons with numbers for checkpoints,button,0,ellipse,,,,,0.5200,0.3400,0.0200,0.0400,
+slide_018_element_05,Interactive buttons with numbers for checkpoints,button,0,ellipse,,,,,0.8700,0.5900,0.0200,0.0400,
+slide_018_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

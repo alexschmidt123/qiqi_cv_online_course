@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_006_element_01,Explore the Cell Cycle,slide_title,0,polygon,,,,,,,,,0.2000:0.0000;0.8000:0.1000;0.8000:0.2000;0.2000:0.2000
+slide_006_element_02,Click each icon to learn more,paragraph,0,polygon,,,,,,,,,0.0000:0.1500;0.3000:0.2000;0.3000:0.2500;0.0000:0.2500
+slide_006_element_03,Cell cycle diagram,image,0,polygon,,,,,,,,,0.2000:0.3000;0.8000:0.9000;0.8000:1.0000;0.2000:1.0000
+slide_006_element_04,"G2 Phase: During the second gap phase, or G2 phase, the cell grows more, makes proteins and organelles, and begins to reorganize its contents in preparation for mitosis. G2 phase ends when mitosis begins.",popup,100,polygon,,,,,,,,,0.3000:0.2500;0.7000:0.4000;0.7000:0.6000;0.3000:0.6000
+slide_006_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

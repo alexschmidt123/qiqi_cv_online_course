@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_015_element_01,Allie's Treatment,slide_title,0,polygon,,,,,,,,,0.2000:0.1100;0.8000:0.1700;0.8000:0.2000;0.2000:0.1400
+slide_015_element_02,Click through Allie's case to learn more about her treatment.,paragraph,0,polygon,,,,,,,,,0.2500:0.2000;0.7500:0.2300;0.7500:0.2700;0.2500:0.2400
+slide_015_element_03,Image of Allie sitting on a medical examination table.,image,0,polygon,,,,,,,,,0.1000:0.3200;0.9000:0.6200;0.9000:0.7200;0.1000:0.4200
+slide_015_element_04,What are Cell Cycle Checkpoints?,paragraph,0,polygon,,,,,,,,,0.6000:0.2000;0.9000:0.2700;0.9000:0.3000;0.6000:0.2300
+slide_015_element_05,The cell cycle is a process all cells go through...,paragraph,0,polygon,,,,,,,,,0.5500:0.3400;0.9500:0.6400;0.9500:0.7200;0.5500:0.4200
+slide_015_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

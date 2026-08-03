@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_011_element_01,Explore the Cell Cycle,slide_title,0,rectangle,0.05,0.95,0.05,0.15,,,,,
+slide_011_element_02,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you're ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.16,0.2,,,,,
+slide_011_element_03,Cell cycle diagram with phases,image,0,rectangle,0.2,0.8,0.25,0.75,,,,,
+slide_011_element_04,G1 phase description,popup,100,polygon,,,,,,,,,0.6000:0.4000;0.9500:0.6000;0.6000:0.8000;0.2500:0.6000
+slide_011_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

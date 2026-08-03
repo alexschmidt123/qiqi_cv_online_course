@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_009_element_01,Explore the Cell Cycle,slide_title,0,polygon,,,,,,,,,0.0500:0.0500;0.9500:0.1000;0.9500:0.1800;0.0500:0.1800
+slide_009_element_02,Instructional text describing interaction with the slide icons.,paragraph,0,polygon,,,,,,,,,0.0500:0.2000;0.9500:0.2500;0.9500:0.3000;0.0500:0.3000
+slide_009_element_03,Mitotic Phase description and image.,panel,0,polygon,,,,,,,,,0.1000:0.3500;0.9000:0.6500;0.9000:0.8500;0.1000:0.8500
+slide_009_element_04,"During the mitotic (M) phase, the cell...",paragraph,0,polygon,,,,,,,,,0.1200:0.3800;0.8800:0.4200;0.8800:0.4700;0.1200:0.4700
+slide_009_element_05,Image of interphase cell.,image,0,polygon,,,,,,,,,0.2000:0.5000;0.8000:0.6700;0.8000:0.8300;0.2000:0.8300
+slide_009_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

@@ -1,0 +1,3 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_010_element_01,Close-up biological or cellular image,image,0,rectangle,0.0,1.0,0.0,1.0,,,,,
+slide_010_element_02,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

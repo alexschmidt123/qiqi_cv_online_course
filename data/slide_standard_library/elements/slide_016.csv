@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_016_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.2000:0.0000;0.8000:0.0900;0.8000:0.1300;0.2000:0.1300
+slide_016_element_02,Instruction on clicking icons to learn more about the cell cycle.,paragraph,0,polygon,,,,,,,,,0.2000:0.1300;0.8000:0.1900;0.8000:0.2300;0.2000:0.2300
+slide_016_element_03,Circular diagram of cell cycle phases and checkpoints.,image,0,rectangle,0.0,1.0,0.19,1.0,,,,,
+slide_016_element_04,Information icon,button,0,ellipse,,,,,0.0650,0.3350,0.0350,0.0350,
+slide_016_element_05,Warning icon,button,0,ellipse,,,,,0.9350,0.4350,0.0350,0.0350,
+slide_016_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

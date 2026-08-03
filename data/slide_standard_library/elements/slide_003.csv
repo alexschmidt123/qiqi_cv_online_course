@@ -1,0 +1,5 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_003_element_01,Explore the Cell Cycle,slide_title,0,rectangle,0.05,0.4,0.15,0.25,,,,,
+slide_003_element_02,Click each icon to learn more about each part of the cell cycle...,paragraph,0,polygon,,,,,,,,,0.0500:0.2800;0.9500:0.3200;0.9500:0.3800;0.0500:0.3400
+slide_003_element_03,Cell cycle diagram,image,0,rectangle,0.25,0.8,0.38,0.92,,,,,
+slide_003_element_04,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

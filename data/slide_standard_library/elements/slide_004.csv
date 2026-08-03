@@ -1,0 +1,4 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_004_element_01,Explore the Cell Cycle,slide_title,0,rectangle,0.1,0.9,0.05,0.15,,,,,
+slide_004_element_02,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.1,0.9,0.16,0.25,,,,,
+slide_004_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

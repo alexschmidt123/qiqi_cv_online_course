@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_020_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.2000:0.1000;0.8000:0.1500;0.8000:0.1800;0.2000:0.1800
+slide_020_element_02,Click each icon to learn more about each part of the cell cycle...,paragraph,0,polygon,,,,,,,,,0.2000:0.2000;0.8000:0.2500;0.8000:0.2800;0.2000:0.2800
+slide_020_element_03,Diagram of Cell Cycle with labeled phases and checkpoints,image,0,polygon,,,,,,,,,0.1000:0.3000;0.9000:0.9000;0.9000:0.6000;0.1000:0.6000
+slide_020_element_04,M Checkpoint (Mitosis) details,popup,100,polygon,,,,,,,,,0.6000:0.3000;0.9500:0.6500;0.9500:0.4000;0.6000:0.4000
+slide_020_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

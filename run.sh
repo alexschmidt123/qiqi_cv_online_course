@@ -12,9 +12,11 @@ MODEL="gpt-4o-mini"
 SAMPLE_INTERVAL="1"
 AI_SCREENSHOTS="6"
 MIN_DURATION="0.1"
+PREPARE_SLIDE_LIBRARY="0"
+SLIDE_LIBRARY="$ROOT/data/slide_standard_library"
 
 usage() {
-  echo "Usage: bash run.sh -dir <video_article|video_slide directory or a video inside one> [-model model] [-sample-interval sec] [-ai-screenshots count] [-min-duration sec]" >&2
+  echo "Usage: bash run.sh -dir <video directory or file> [-prepare-slide-library] [-model model] [-sample-interval sec] [-ai-screenshots count] [-min-duration sec]" >&2
 }
 
 while [ "$#" -gt 0 ]; do
@@ -24,6 +26,7 @@ while [ "$#" -gt 0 ]; do
     -sample-interval) shift; [ -n "${1:-}" ] || { usage; exit 1; }; SAMPLE_INTERVAL="$1"; shift ;;
     -ai-screenshots) shift; [ -n "${1:-}" ] || { usage; exit 1; }; AI_SCREENSHOTS="$1"; shift ;;
     -min-duration) shift; [ -n "${1:-}" ] || { usage; exit 1; }; MIN_DURATION="$1"; shift ;;
+    -prepare-slide-library) PREPARE_SLIDE_LIBRARY="1"; shift ;;
     *) usage; exit 1 ;;
   esac
 done
@@ -65,6 +68,54 @@ if [ "${CONDA_DEFAULT_ENV:-}" != "cv_env" ] && command -v conda >/dev/null 2>&1;
   }
 fi
 
+slide_library_complete() {
+  python3 - "$SLIDE_LIBRARY" <<'PY'
+import csv
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+manifest = root / "slides.csv"
+if not manifest.exists() or list(root.rglob("*.json")):
+    raise SystemExit(1)
+with manifest.open(newline="", encoding="utf-8") as handle:
+    slides = list(csv.DictReader(handle))
+if len(slides) < 22:
+    raise SystemExit(1)
+for slide in slides:
+    if not (root / "templates" / slide["template_image"]).is_file():
+        raise SystemExit(1)
+    references = [name for name in slide["reference_images"].split(";") if name]
+    if not references or any(not (root / "references" / name).is_file() for name in references):
+        raise SystemExit(1)
+    table = root / "elements" / slide["element_table"]
+    if not table.is_file():
+        raise SystemExit(1)
+    with table.open(newline="", encoding="utf-8") as handle:
+        elements = list(csv.DictReader(handle))
+    if not elements or not any(row.get("element_type") != "blank_area" for row in elements):
+        raise SystemExit(1)
+PY
+}
+
+if [ "$VIDEO_TYPE" = "slides" ]; then
+  if [ "$PREPARE_SLIDE_LIBRARY" = "1" ] || ! slide_library_complete; then
+    echo "Preparing shared slide library from $(basename "${videos[0]}")"
+    prep_dir="$(mktemp -d)"
+    python3 "$ROOT/script/step_1_detect_gaze.py" --video "${videos[0]}" --output-dir "$prep_dir" \
+      --output-name gaze.csv --no-validation
+    python3 "$ROOT/script/step_2_analyze_video_with_ai.py" \
+      --video "${videos[0]}" --output-dir "$SLIDE_LIBRARY" --gaze-csv "$prep_dir/gaze.csv" \
+      --type slides --model gpt-4o --sample-interval "$SAMPLE_INTERVAL" \
+      --standard-library-dir "$SLIDE_LIBRARY" --prepare-slide-library
+    find "$prep_dir" -depth -type f -delete
+    rmdir "$prep_dir"
+    slide_library_complete || { echo "Prepared slide library failed completeness validation" >&2; exit 1; }
+  else
+    echo "Shared slide library is complete; skipping preparation"
+  fi
+fi
+
 for video in "${videos[@]}"; do
   filename="$(basename "$video")"
   video_id="${filename%.*}"
@@ -83,7 +134,7 @@ for video in "${videos[@]}"; do
     --gaze-csv "$outdir/debug/gaze_coordinates.internal" \
     --type "$VIDEO_TYPE" --model "$MODEL" --sample-interval "$SAMPLE_INTERVAL" \
     --ai-screenshots "$AI_SCREENSHOTS" \
-    --standard-library-dir "$ROOT/output/slide_standard_library" \
+    --standard-library-dir "$SLIDE_LIBRARY" \
     > "$outdir/debug/step_2.log" 2>&1
 
   if [ "$VIDEO_TYPE" = "article" ]; then

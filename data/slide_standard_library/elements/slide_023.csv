@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_023_element_01,Cell Cycle Checkpoints,slide_title,0,rectangle,0.2,0.6,0.1,0.2,,,,,
+slide_023_element_02,Click each icon to learn more about each part of the cell cycle.,paragraph,0,polygon,,,,,,,,,0.2000:0.2000;0.8000:0.3000;0.8000:0.3500;0.2000:0.3000
+slide_023_element_03,What are Cell Cycle Checkpoints,popup,100,polygon,,,,,,,,,0.0500:0.4000;0.4500:0.6000;0.4500:0.8000;0.0500:0.6000
+slide_023_element_04,Diagram of Cell Cycle,image,0,rectangle,0.5,1.0,0.3,1.0,,,,,
+slide_023_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
