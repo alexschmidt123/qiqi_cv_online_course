@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_024_element_01,Click each area to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_024_element_02,"S Phase (synthesis) In S phase, the cell synthesizes a complete copy of the DNA in the nucleus. It also duplicates a microtubule structure called the centrosome. The centrosomes help separate DNA during M phase.",popup,100,rectangle,0.15,0.55,0.15,0.45,,,,,
+slide_024_element_03,Cell cycle diagram with phases labeled,image,0,rectangle,0.3,0.9,0.3,0.9,,,,,
+slide_024_element_04,2,button,20,ellipse,,,,,0.475,0.525,0.025,0.025,
+slide_024_element_05,1,button,20,ellipse,,,,,0.575,0.675,0.025,0.025,
+slide_024_element_06,3,button,20,ellipse,,,,,0.675,0.425,0.025,0.025,
+slide_024_element_07,4,button,20,ellipse,,,,,0.825,0.225,0.025,0.025,
+slide_024_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

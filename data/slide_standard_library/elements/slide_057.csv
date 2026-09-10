@@ -1,0 +1,8 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_057_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you're ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.05,0.12,,,,,
+slide_057_element_02,"G2 phase During the second gap phase, or G2 phase, the cell g...",popup,100,rectangle,0.25,0.75,0.18,0.32,,,,,
+slide_057_element_03,Cell cycle diagram with phases and numbered buttons,image,0,rectangle,0.2,0.8,0.35,0.9,,,,,
+slide_057_element_04,2,button,20,ellipse,,,,,0.45,0.55,0.03,0.03,
+slide_057_element_05,3,button,20,ellipse,,,,,0.61,0.45,0.03,0.03,
+slide_057_element_06,1,button,20,ellipse,,,,,0.61,0.71,0.03,0.03,
+slide_057_element_07,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

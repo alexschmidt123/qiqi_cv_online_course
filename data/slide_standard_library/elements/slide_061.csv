@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_061_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_061_element_02,Cell cycle diagram,image,0,rectangle,0.15,0.55,0.15,0.85,,,,,
+slide_061_element_03,i,button,20,ellipse,,,,,0.07,0.17,0.02,0.02,
+slide_061_element_04,1,button,20,ellipse,,,,,0.54,0.77,0.02,0.02,
+slide_061_element_05,2,button,20,ellipse,,,,,0.47,0.27,0.02,0.02,
+slide_061_element_06,3,button,20,ellipse,,,,,0.57,0.47,0.02,0.02,
+slide_061_element_07,"G1 checkpoint Purpose: This checkpoint is like the starting line for the cell cycle. • Check: The cell checks if it has enough nutrients, energy, and the right signals to start dividing. • Decision: If everything is good, the cell moves to the next stage (S phase). If not, it might pause or go into a resting state.",popup,100,rectangle,0.55,0.95,0.35,0.75,,,,,
+slide_061_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

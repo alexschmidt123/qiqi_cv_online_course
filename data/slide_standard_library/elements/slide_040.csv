@@ -1,0 +1,10 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_040_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_040_element_02,i,button,20,ellipse,,,,,0.045,0.175,0.025,0.025,
+slide_040_element_03,What are Cell Cycle Checkpoints As cells move through the cell cycle...,popup,100,rectangle,0.08,0.55,0.15,0.45,,,,,
+slide_040_element_04,Cell cycle diagram,image,0,rectangle,0.55,0.95,0.2,0.8,,,,,
+slide_040_element_05,1,button,20,ellipse,,,,,0.725,0.725,0.025,0.025,
+slide_040_element_06,2,button,20,ellipse,,,,,0.725,0.375,0.025,0.025,
+slide_040_element_07,3,button,20,ellipse,,,,,0.825,0.325,0.025,0.025,
+slide_040_element_08,!,button,20,ellipse,,,,,0.925,0.625,0.025,0.025,
+slide_040_element_09,Entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

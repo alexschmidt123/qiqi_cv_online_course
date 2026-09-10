@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_052_element_01,Click through Allie’s case to learn more about her treatment.,paragraph,0,rectangle,0.25,0.75,0.1,0.2,,,,,
+slide_052_element_02,Doctor with clipboard and stethoscope,image,0,rectangle,0.05,0.5,0.25,0.65,,,,,
+slide_052_element_03,"Treatment Questions “This 6-MP—how does it work? How is it going to help her?” Allie’s mom asked. “That’s a great question.” Dr. Harris replied. “To explain how 6-MP works, it’s important to understand something called the cell cycle.”",paragraph,0,rectangle,0.55,0.95,0.25,0.65,,,,,
+slide_052_element_04,pagination dots,slide_navigation,0,rectangle,0.45,0.55,0.9,0.95,,,,,
+slide_052_element_05,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

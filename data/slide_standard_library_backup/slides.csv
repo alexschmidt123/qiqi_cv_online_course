@@ -1,0 +1,24 @@
+slide_id,description,reference_images,template_image,element_table
+slide_001,Slide detailing Allie's medical treatment plan.,slide_001_ref_01.png;slide_001_ref_02.png,slide_001.png,slide_001.csv
+slide_002,Allie's Treatment description with details about the treatment process.,slide_002_ref_01.png,slide_002.png,slide_002.csv
+slide_003,Interactive slide on the cell cycle.,slide_003_ref_01.png;slide_003_ref_02.png;slide_003_ref_03.png;slide_003_ref_04.png;slide_003_ref_05.png;slide_003_ref_06.png;slide_003_ref_07.png;slide_003_ref_08.png;slide_003_ref_09.png;slide_003_ref_10.png;slide_003_ref_11.png;slide_003_ref_12.png;slide_003_ref_13.png;slide_003_ref_14.png,slide_003.png,slide_003.csv
+slide_004,Overview of the cell cycle with clickable phases.,slide_004_ref_01.png;slide_004_ref_02.png;slide_004_ref_03.png;slide_004_ref_04.png,slide_004.png,slide_004.csv
+slide_005,Introduction to the cell cycle with details about the S Phase.,slide_005_ref_01.png;slide_005_ref_02.png,slide_005.png,slide_005.csv
+slide_006,Diagram of the cell cycle with a popup description of the G2 phase.,slide_006_ref_01.png;slide_006_ref_02.png,slide_006.png,slide_006.csv
+slide_007,Cell cycle overview with an interactive diagram.,slide_007_ref_01.png,slide_007.png,slide_007.csv
+slide_008,Interaction screen displaying information about the mitotic phase with an instructional heading.,slide_008_ref_01.png;slide_008_ref_02.png;slide_008_ref_03.png;slide_008_ref_04.png;slide_008_ref_05.png;slide_008_ref_06.png;slide_008_ref_07.png;slide_008_ref_08.png,slide_008.png,slide_008.csv
+slide_009,Exploring the Mitotic Phase of the cell cycle.,slide_009_ref_01.png;slide_009_ref_02.png,slide_009.png,slide_009.csv
+slide_010,Microscopic or biological imagery slide,slide_010_ref_01.png,slide_010.png,slide_010.csv
+slide_011,Slide displaying different phases of the cell cycle with interactive elements.,slide_011_ref_01.png,slide_011.png,slide_011.csv
+slide_012,Slide showing an overview of the cell cycle with interactive elements.,slide_012_ref_01.png;slide_012_ref_02.png;slide_012_ref_03.png,slide_012.png,slide_012.csv
+slide_013,Interactive slide with pop-up information on G2 phase.,slide_013_ref_01.png,slide_013.png,slide_013.csv
+slide_014,Overview of the cell cycle with missing concepts and conclusion.,slide_014_ref_01.png,slide_014.png,slide_014.csv
+slide_015,Slide detailing Allie's treatment in relation to cell checkpoints.,slide_015_ref_01.png,slide_015.png,slide_015.csv
+slide_016,Diagram illustrating cell cycle checkpoints with interactive icons.,slide_016_ref_01.png;slide_016_ref_02.png;slide_016_ref_03.png;slide_016_ref_04.png;slide_016_ref_05.png;slide_016_ref_06.png;slide_016_ref_07.png;slide_016_ref_08.png;slide_016_ref_09.png;slide_016_ref_10.png;slide_016_ref_11.png;slide_016_ref_12.png;slide_016_ref_13.png;slide_016_ref_14.png;slide_016_ref_15.png;slide_016_ref_16.png,slide_016.png,slide_016.csv
+slide_017,Slide explaining cell cycle checkpoints with interactive elements.,slide_017_ref_01.png;slide_017_ref_02.png,slide_017.png,slide_017.csv
+slide_018,Slide showing cell cycle checkpoints with interactive elements.,slide_018_ref_01.png,slide_018.png,slide_018.csv
+slide_019,Slide on Cell Cycle Checkpoints with G2 Checkpoint details.,slide_019_ref_01.png;slide_019_ref_02.png;slide_019_ref_03.png;slide_019_ref_04.png;slide_019_ref_05.png,slide_019.png,slide_019.csv
+slide_020,Cell Cycle Checkpoints with focus on Mitotic Checkpoint,slide_020_ref_01.png;slide_020_ref_02.png,slide_020.png,slide_020.csv
+slide_021,Apoptosis explanation with detailed steps.,slide_021_ref_01.png,slide_021.png,slide_021.csv
+slide_022,Slide explaining cell cycle checkpoints with interactive elements to explore each phase.,slide_022_ref_01.png,slide_022.png,slide_022.csv
+slide_023,Cell Cycle Checkpoints overview with interactive elements,slide_023_ref_01.png;slide_023_ref_02.png;slide_023_ref_03.png;slide_023_ref_04.png;slide_023_ref_05.png,slide_023.png,slide_023.csv

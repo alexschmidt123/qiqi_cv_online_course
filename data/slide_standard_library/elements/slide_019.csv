@@ -1,6 +1,9 @@
 element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
-slide_019_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.3000:0.0100;0.7000:0.0500;0.7000:0.1000;0.3000:0.1000
-slide_019_element_02,Interactive instruction for exploring cell cycle.,paragraph,0,polygon,,,,,,,,,0.1500:0.1200;0.8500:0.1700;0.8500:0.2000;0.1500:0.2000
-slide_019_element_03,G2 Checkpoint details,paragraph,0,polygon,,,,,,,,,0.1000:0.2500;0.5500:0.5000;0.5500:0.6000;0.1000:0.6000
-slide_019_element_04,Cell cycle diagram with checkpoints,image,0,polygon,,,,,,,,,0.5500:0.2500;0.9900:0.8000;0.9900:0.9000;0.5500:0.9000
-slide_019_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
+slide_019_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.05,0.12,,,,,
+slide_019_element_02,Cell cycle diagram,image,0,rectangle,0.25,0.75,0.15,0.85,,,,,
+slide_019_element_03,i,button,20,ellipse,,,,,0.07,0.37,0.02,0.02,
+slide_019_element_04,1,button,20,ellipse,,,,,0.47,0.82,0.02,0.02,
+slide_019_element_05,2,button,20,ellipse,,,,,0.57,0.32,0.02,0.02,
+slide_019_element_06,3,button,20,ellipse,,,,,0.67,0.57,0.02,0.02,
+slide_019_element_07,"G1 checkpoint Purpose: This checkpoint is like the starting line for the cell cycle. Check: The cell checks if it has enough nutrients, energy, and the right signals to start dividing. Decision: If everything is good, the cell moves to the next stage (S phase). If not, it might pause or go into a resting state.",popup,100,rectangle,0.7,0.95,0.2,0.7,,,,,
+slide_019_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

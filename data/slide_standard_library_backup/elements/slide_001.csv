@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_001_element_01,Allie’s Treatment,slide_title,0,rectangle,0.258,0.5,0.086,0.126,,,,,
+slide_001_element_02,Click through Allie’s case to learn more about her treatment.,paragraph,0,rectangle,0.258,0.476,0.139,0.162,,,,,
+slide_001_element_03,Hospital IV equipment,image,0,rectangle,0.0,0.239,0.222,0.559,,,,,
+slide_001_element_04,"Allie’s Treatment “We’re ready to start treatment right away” Allie’s oncologist explains. “One of the key medications we’ll be using is called 6-mercaptopurine, or 6-MP for short.”",paragraph,0,rectangle,0.559,0.971,0.343,0.475,,,,,
+slide_001_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

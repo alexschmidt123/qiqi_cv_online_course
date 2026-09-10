@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_063_element_01,Click each icon to learn more about each part of the cell cycle.,paragraph,0,rectangle,0.05,0.95,0.05,0.12,,,,,
+slide_063_element_02,Diagram of cell cycle with phases labeled,image,0,rectangle,0.25,0.75,0.15,0.85,,,,,
+slide_063_element_03,i,button,20,ellipse,,,,,0.07,0.17,0.02,0.02,
+slide_063_element_04,2,button,20,ellipse,,,,,0.57,0.27,0.02,0.02,
+slide_063_element_05,3,button,20,ellipse,,,,,0.67,0.47,0.02,0.02,
+slide_063_element_06,4,button,20,ellipse,,,,,0.47,0.77,0.02,0.02,
+slide_063_element_07,M Checkpoint (Mitosis) Purpose: This is where the cell actually divides into two new cells.,popup,100,rectangle,0.75,0.95,0.15,0.85,,,,,
+slide_063_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

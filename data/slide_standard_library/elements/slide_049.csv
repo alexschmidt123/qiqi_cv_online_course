@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_049_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.05,0.12,,,,,
+slide_049_element_02,Diagram of cell cycle phases,image,0,rectangle,0.1,0.9,0.15,0.85,,,,,
+slide_049_element_03,1,button,20,ellipse,,,,,0.475,0.675,0.025,0.025,
+slide_049_element_04,2,button,20,ellipse,,,,,0.375,0.575,0.025,0.025,
+slide_049_element_05,3,button,20,ellipse,,,,,0.575,0.475,0.025,0.025,
+slide_049_element_06,4,button,20,ellipse,,,,,0.725,0.325,0.025,0.025,
+slide_049_element_07,"G1 phase During G1 phase, also called the first gap phase, the cell grows physically larger, copies organelles, and makes the molecular building blocks it will need in later steps.",popup,100,rectangle,0.55,0.95,0.5,0.75,,,,,
+slide_049_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

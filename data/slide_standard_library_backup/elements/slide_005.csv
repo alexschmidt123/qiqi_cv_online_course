@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_005_element_01,Explore the Cell Cycle,slide_title,0,rectangle,0.11,0.89,0.05,0.15,,,,,
+slide_005_element_02,Click each icon to learn about each part of the cell cycle.,paragraph,0,rectangle,0.11,0.89,0.15,0.25,,,,,
+slide_005_element_03,Cell cycle diagram,image,0,rectangle,0.14,0.86,0.25,0.95,,,,,
+slide_005_element_04,S Phase (synthesis) details,popup,100,rectangle,0.12,0.45,0.33,0.63,,,,,
+slide_005_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

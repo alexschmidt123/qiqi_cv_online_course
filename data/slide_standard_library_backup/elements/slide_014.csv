@@ -1,0 +1,6 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_014_element_01,Explore the Cell Cycle,slide_title,0,rectangle,0.27,0.73,0.05,0.13,,,,,
+slide_014_element_02,indeed involves the cell splitting...,paragraph,0,rectangle,0.0,1.0,0.15,0.22,,,,,
+slide_014_element_03,MISSING CONCEPTS:...,paragraph,0,rectangle,0.0,1.0,0.25,0.45,,,,,
+slide_014_element_04,CONCLUSION:...Keep up the good work!,paragraph,0,rectangle,0.0,1.0,0.48,0.8,,,,,
+slide_014_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

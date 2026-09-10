@@ -1,7 +1,9 @@
 element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
-slide_015_element_01,Allie's Treatment,slide_title,0,polygon,,,,,,,,,0.2000:0.1100;0.8000:0.1700;0.8000:0.2000;0.2000:0.1400
-slide_015_element_02,Click through Allie's case to learn more about her treatment.,paragraph,0,polygon,,,,,,,,,0.2500:0.2000;0.7500:0.2300;0.7500:0.2700;0.2500:0.2400
-slide_015_element_03,Image of Allie sitting on a medical examination table.,image,0,polygon,,,,,,,,,0.1000:0.3200;0.9000:0.6200;0.9000:0.7200;0.1000:0.4200
-slide_015_element_04,What are Cell Cycle Checkpoints?,paragraph,0,polygon,,,,,,,,,0.6000:0.2000;0.9000:0.2700;0.9000:0.3000;0.6000:0.2300
-slide_015_element_05,The cell cycle is a process all cells go through...,paragraph,0,polygon,,,,,,,,,0.5500:0.3400;0.9500:0.6400;0.9500:0.7200;0.5500:0.4200
-slide_015_element_06,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
+slide_015_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow to continue.,paragraph,0,rectangle,0.05,0.95,0.05,0.12,,,,,
+slide_015_element_02,Cell cycle diagram,image,0,rectangle,0.25,0.75,0.15,0.85,,,,,
+slide_015_element_03,i,button,20,ellipse,,,,,0.075,0.375,0.025,0.025,
+slide_015_element_04,1,button,20,ellipse,,,,,0.725,0.775,0.025,0.025,
+slide_015_element_05,2,button,20,ellipse,,,,,0.575,0.275,0.025,0.025,
+slide_015_element_06,3,button,20,ellipse,,,,,0.625,0.525,0.025,0.025,
+slide_015_element_07,"M Checkpoint (Mitosis) Purpose: This is where the cell actually divides into two new cells. Check: The cell checks if the chromosomes are lined up correctly and ready to be separated. Decision: If everything is in order, the cell completes division. If there are problems, it might stop and try to fix things before moving on. This checkpoint is associated with the Metaphase stage in mitosis. If chromosomes aren't aligned, the cell may enter metaphase arrest or apoptosis.",popup,100,rectangle,0.75,0.95,0.1,0.8,,,,,
+slide_015_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

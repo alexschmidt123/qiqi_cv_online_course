@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_002_element_01,Allie's Treatment,slide_title,10,rectangle,0.3689,0.6526,0.1257,0.2212,,,,,
+slide_002_element_02,Click through Allie's case to learn more about her treatment.,paragraph,0,rectangle,0.2725,0.7331,0.2212,0.2779,,,,,
+slide_002_element_03,Photo of medical consultation,image,0,rectangle,0.1150,0.5600,0.3100,0.8850,,,,,
+slide_002_element_04,Treatment Questions and dialogue about 6-MP and the cell cycle,paragraph,5,rectangle,0.6273,0.9270,0.4035,0.7770,,,,,
+slide_002_element_05,Slide pagination dots,slide_navigation,0,rectangle,0.2750,0.3600,0.8850,0.9350,,,,,
+slide_002_element_06,blank area,blank_area,-100,rectangle,0.0000,1.0000,0.0000,1.0000,,,,,

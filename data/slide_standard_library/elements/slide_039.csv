@@ -1,0 +1,7 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_039_element_01,Click each icon to learn,paragraph,0,rectangle,0.02,0.35,0.05,0.12,,,,,
+slide_039_element_02,i,button,20,ellipse,,,,,0.04,0.17,0.02,0.02,
+slide_039_element_03,"Apoptosis (optional, like an emergency exit)...",popup,100,rectangle,0.25,0.75,0.1,0.35,,,,,
+slide_039_element_04,Cell cycle diagram,image,0,rectangle,0.25,0.75,0.4,0.9,,,,,
+slide_039_element_05,1,button,20,ellipse,,,,,0.7,0.82,0.02,0.02,
+slide_039_element_06,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

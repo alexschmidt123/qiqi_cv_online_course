@@ -1,0 +1,10 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_062_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_062_element_02,"G2 Checkpoint Purpose: This checkpoint prepares the cell for divis... Check: The cell checks if DNA replication was successful and if it has enough resources to support division. Decision: If everything looks good, the cell gets the green light to enter the final stage (M phase). If there are issues, the cell might pause for repairs or enter a resting state.",popup,100,rectangle,0.05,0.55,0.15,0.55,,,,,
+slide_062_element_03,Cell cycle diagram with phases and checkpoints,image,0,rectangle,0.55,0.95,0.15,0.75,,,,,
+slide_062_element_04,i,button,20,ellipse,,,,,0.045,0.175,0.025,0.025,
+slide_062_element_05,!,button,20,ellipse,,,,,0.925,0.625,0.025,0.025,
+slide_062_element_06,1,button,20,ellipse,,,,,0.725,0.675,0.025,0.025,
+slide_062_element_07,2,button,20,ellipse,,,,,0.675,0.325,0.025,0.025,
+slide_062_element_08,3,button,20,ellipse,,,,,0.825,0.275,0.025,0.025,
+slide_062_element_09,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

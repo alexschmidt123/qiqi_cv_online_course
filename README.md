@@ -55,6 +55,9 @@ their files pass validation. Force a rebuild with:
 bash run.sh -dir data/video_slide/R4_P1.mp4 -prepare-slide-library -model gpt-4o
 ```
 
+Slide library labeling + ChatGPT API prompt (one file):  
+[`docs/SOP_CHATGPT_SLIDE_ELEMENT_SEGMENTATION.md`](docs/SOP_CHATGPT_SLIDE_ELEMENT_SEGMENTATION.md)
+
 Process one slide video:
 
 ```bash

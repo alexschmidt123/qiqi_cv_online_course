@@ -43,6 +43,19 @@ COLORS = {
     "slide_navigation": (255, 150, 0),
     "blank_area": (150, 150, 150),
 }
+# These must be stored/loaded as axis-aligned rectangles. Skewed AI quads (common with
+# gpt-4o-mini) are collapsed to AABB so overlays match the real layout.
+RECTANGULAR_ELEMENT_TYPES = frozenset({
+    "web_navigation",
+    "web_panel",
+    "webpage_title",
+    "slide_title",
+    "paragraph",
+    "image",
+    "popup",
+    "slide_navigation",
+    "blank_area",
+})
 
 
 def _display_text(value: str) -> str:
@@ -63,6 +76,13 @@ class Sample:
 
 def _rect_polygon(x0: float, y0: float, x1: float, y1: float) -> List[List[float]]:
     return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+
+
+def _axis_aligned_rect_from_polygon(polygon: Sequence[Sequence[float]]) -> List[List[float]]:
+    """Collapse any polygon to a tight axis-aligned rectangle (AABB)."""
+    xs = [float(p[0]) for p in polygon]
+    ys = [float(p[1]) for p in polygon]
+    return _rect_polygon(min(xs), min(ys), max(xs), max(ys))
 
 
 def _ellipse_polygon(cx: float, cy: float, rx: float, ry: float, points: int = 24) -> List[List[float]]:
@@ -117,6 +137,38 @@ def _crop_to_roi(frame: np.ndarray, roi: Sequence[Sequence[float]]) -> np.ndarra
     return frame[y0:y1, x0:x1]
 
 
+def _remove_pointer_cursor(frame: np.ndarray) -> np.ndarray:
+    """Remove white/light mouse or hand cursors; keep green lesson-button glyphs."""
+    out = frame.copy()
+    hsv = cv2.cvtColor(out, cv2.COLOR_BGR2HSV)
+    white = cv2.inRange(hsv, np.array([0, 0, 200]), np.array([180, 55, 255]))
+    # Exclude bright pixels that sit on green filled buttons (clicked icons).
+    green = cv2.inRange(hsv, np.array([40, 80, 80]), np.array([95, 255, 255]))
+    green = cv2.dilate(green, np.ones((15, 15), np.uint8), iterations=1)
+    white = cv2.bitwise_and(white, cv2.bitwise_not(green))
+    contours, _ = cv2.findContours(white, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    mask = np.zeros(white.shape, dtype=np.uint8)
+    h, w = white.shape
+    for contour in contours:
+        area = float(cv2.contourArea(contour))
+        if area < 60 or area > 4500:
+            continue
+        x, y, bw, bh = cv2.boundingRect(contour)
+        if bw < 4 or bh < 4:
+            continue
+        aspect = max(bw, bh) / max(1, min(bw, bh))
+        if aspect > 5.5:
+            continue
+        # Skip huge bright panels / text blocks.
+        if bw * bh > 0.04 * w * h:
+            continue
+        cv2.drawContours(mask, [contour], -1, 255, -1)
+    if np.any(mask):
+        mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=1)
+        out = cv2.inpaint(out, mask, 4, cv2.INPAINT_TELEA)
+    return out
+
+
 def _remove_red_gaze(frame: np.ndarray, gaze: Optional[Tuple[float, float]] = None) -> np.ndarray:
     """Remove the red gaze marker from screenshots before state comparison/AI."""
     out = frame.copy()
@@ -132,10 +184,24 @@ def _remove_red_gaze(frame: np.ndarray, gaze: Optional[Tuple[float, float]] = No
         local = np.zeros(mask.shape, dtype=np.uint8)
         cv2.circle(local, (round(gaze[0]), round(gaze[1])), 34, 255, -1)
         gaze_mask = cv2.bitwise_and(mask, local)
+    else:
+        # Offline crop may lack gaze coords; still clear small red dots only.
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            area = float(cv2.contourArea(contour))
+            if 20 <= area <= 2500:
+                cv2.drawContours(gaze_mask, [contour], -1, 255, -1)
     if np.any(gaze_mask):
         gaze_mask = cv2.dilate(gaze_mask, np.ones((7, 7), np.uint8), iterations=1)
         out = cv2.inpaint(out, gaze_mask, 5, cv2.INPAINT_TELEA)
     return out
+
+
+def _remove_overlay_markers(
+    frame: np.ndarray, gaze: Optional[Tuple[float, float]] = None
+) -> np.ndarray:
+    """Offline/online clean: ignore red gaze circle and pointer cursor."""
+    return _remove_pointer_cursor(_remove_red_gaze(frame, gaze))
 
 
 def _visual_difference(a: np.ndarray, b: np.ndarray, roi: Sequence[Sequence[float]]) -> float:
@@ -227,7 +293,7 @@ def collect_samples(
         if not ok or frame is None:
             continue
         gaze = _nearest_gaze(gaze_points, float(timestamp), max(interval, 0.5))
-        clean = _remove_red_gaze(frame, gaze)
+        clean = _remove_overlay_markers(frame, gaze)
         sample_id = f"sample_{len(samples) + 1:03d}"
         if video_type == "slides":
             matches = [(diff, pid) for pid, representative in unique_patterns for diff in [_visual_difference(representative, clean, course_roi)]]
@@ -271,6 +337,102 @@ def _extract_json(text: str) -> Dict[str, Any]:
         if start < 0 or end <= start:
             raise RuntimeError("AI response did not contain a JSON object")
         return json.loads(value[start : end + 1])
+
+
+def _load_slide_segmentation_sop() -> str:
+    """Load API prompt from the single SOP markdown (between BEGIN/END markers)."""
+    path = Path(__file__).resolve().parents[1] / "docs" / "SOP_CHATGPT_SLIDE_ELEMENT_SEGMENTATION.md"
+    text = path.read_text(encoding="utf-8")
+    begin, end = "<!-- BEGIN_API_PROMPT -->", "<!-- END_API_PROMPT -->"
+    start, stop = text.find(begin), text.find(end)
+    if start < 0 or stop <= start:
+        raise RuntimeError(f"API prompt markers missing in {path}")
+    prompt = text[start + len(begin) : stop].strip()
+    if not prompt:
+        raise RuntimeError(f"empty API prompt in {path}")
+    return prompt
+
+
+def _element_from_sop_item(item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Normalize SOP JSON item (x0,y0,x1,y1 or polygons) into element with polygons."""
+    if not isinstance(item, dict):
+        return None
+    element_type = str(item.get("element_type") or "").strip()
+    if not element_type:
+        return None
+    label = str(item.get("label") or element_type)
+    try:
+        priority = int(item.get("priority") or 0)
+    except (TypeError, ValueError):
+        priority = 0
+    polygons: List[List[List[float]]] = []
+    if all(k in item for k in ("x0", "y0", "x1", "y1")):
+        x0, y0 = float(item["x0"]), float(item["y0"])
+        x1, y1 = float(item["x1"]), float(item["y1"])
+        x0, x1 = sorted((max(0.0, min(1.0, x0)), max(0.0, min(1.0, x1))))
+        y0, y1 = sorted((max(0.0, min(1.0, y0)), max(0.0, min(1.0, y1))))
+        if x1 - x0 < 1e-4 or y1 - y0 < 1e-4:
+            return None
+        polygons = [_rect_polygon(x0, y0, x1, y1)]
+    else:
+        for raw in item.get("polygons") or []:
+            poly = _normalize_polygon(raw)
+            if poly:
+                if element_type in RECTANGULAR_ELEMENT_TYPES:
+                    poly = _axis_aligned_rect_from_polygon(poly)
+                polygons.append(poly)
+    if not polygons:
+        return None
+    return {
+        "element_type": element_type,
+        "label": label,
+        "priority": priority,
+        "polygons": polygons,
+    }
+
+
+def segment_one_slide_crop_with_sop(
+    crop_bgr: np.ndarray,
+    model: str,
+) -> Dict[str, Any]:
+    """
+    One-crop ChatGPT vision call using docs SOP prompt (axis-aligned x0,y0,x1,y1).
+    Returns a state dict compatible with prepare_slide_standard_library.
+    """
+    load_dotenv()
+    if not os.environ.get("OPENAI_API_KEY", "").strip():
+        raise RuntimeError("OPENAI_API_KEY is required for slide SOP segmentation")
+    if crop_bgr is None or crop_bgr.size == 0:
+        raise RuntimeError("empty slide crop")
+    client = OpenAI()
+    prompt = _load_slide_segmentation_sop()
+    content = [
+        {"type": "input_text", "text": prompt},
+        {"type": "input_image", "image_url": _jpeg_data_url(crop_bgr), "detail": "high"},
+    ]
+    response = client.responses.create(
+        model=model,
+        input=[{"role": "user", "content": content}],
+        max_output_tokens=4000,
+        temperature=0,
+    )
+    obj = _extract_json(response.output_text)
+    elements: List[Dict[str, Any]] = []
+    for item in obj.get("elements") or []:
+        normalized = _element_from_sop_item(item)
+        if normalized is not None:
+            elements.append(normalized)
+    if not any(e.get("element_type") == "blank_area" for e in elements):
+        elements.append({
+            "element_type": "blank_area",
+            "label": "blank area",
+            "priority": -100,
+            "polygons": [[[0, 0], [1, 0], [1, 1], [0, 1]]],
+        })
+    return {
+        "state_description": str(obj.get("state_description") or ""),
+        "elements": elements,
+    }
 
 
 def _select_ai_screenshots(samples: Sequence[Sample], limit: int) -> List[Sample]:
@@ -386,11 +548,15 @@ Rules:
   paragraph, image, button, or popup. The whole-crop polygon is allowed only for blank_area.
 - Keep title, body paragraph, figure, each button, and each visible popup as separate elements.
   A popup polygon must tightly cover the popup panel and use element_type popup with priority >= 100.
-- Trace actual visible boundaries. Do not draw diagonal edges around rectangular content. Use a
-  four-corner rectangle for rectangular text, images, panels, and popups. Include the full visible
-  text block, not a small excerpt, and never cover a different neighboring element.
-- Preserve the real shape of non-rectangular elements. Use 8-16 boundary points for circles,
-  curved buttons, diagrams, and irregular or concave figures; never replace them with a bounding box.
+- Trace actual visible boundaries. **Forbidden:** skewed / tilted / parallelogram quads around
+  rectangular content. For slide_title, paragraph, image, popup, web_*, slide_navigation, and
+  blank_area, polygons MUST be axis-aligned rectangles with corners
+  ``[[x0,y0],[x1,y0],[x1,y1],[x0,y1]]`` (same y on top edge, same y on bottom edge). Place each
+  box tightly on the real pixels of that element — do not float a title box in empty margin above
+  the title text. Include the full visible text block, not a small excerpt, and never cover a
+  neighboring element.
+- Preserve the real shape of non-rectangular **buttons** and curved diagram marks only. Use 8-16
+  boundary points for circles and curved buttons; never replace a circular button with a huge box.
 - Do not treat the red gaze marker as content.
 - For articles, produce one state for each sample_id and assign its article section.
 - For slides, produce one state for each unique pattern_id and put that pattern_id in sample_id.
@@ -608,7 +774,11 @@ def _read_slide_csv_library(standard_dir: Path) -> List[Dict[str, Any]]:
                     else:
                         points = [[float(v) for v in pair.split(":")] for pair in row["points"].split(";") if pair]
                         if len(points) >= 3:
-                            item["polygons"].append(points)
+                            # Repair legacy skewed quads for rectangular types → AABB.
+                            if row["element_type"] in RECTANGULAR_ELEMENT_TYPES:
+                                item["polygons"].append(_axis_aligned_rect_from_polygon(points))
+                            else:
+                                item["polygons"].append(points)
             slides.append({
                 "slide_id": slide["slide_id"], "description": slide["description"],
                 "reference_images": (slide.get("reference_images") or slide.get("reference_image") or "").split(";"),
@@ -687,12 +857,12 @@ def prepare_slide_standard_library(
         raise RuntimeError(f"Only {len(representatives)} unique slide states found; at least 22 are required")
 
     learned_by_id: Dict[str, Dict[str, Any]] = {}
-    # One screenshot per vision task avoids cross-slide coordinate confusion.
+    # One screenshot per vision task; use SOP prompt (axis-aligned boxes, ~1em text pad).
     def learn_one(sample: Sample) -> Tuple[str, Dict[str, Any]]:
+        crop = _crop_to_roi(sample.clean_frame, course_roi)
         state: Dict[str, Any] = {}
         for _ in range(3):
-            result = analyze_with_ai(video_name, [sample], model, "slides", 1, course_roi)
-            state = next(iter(result.get("states", [])), {})
+            state = segment_one_slide_crop_with_sop(crop, model)
             if any(
                 str(element.get("element_type")) != "blank_area"
                 and any(_normalize_polygon(polygon) for polygon in element.get("polygons", []))
@@ -745,14 +915,23 @@ def prepare_slide_standard_library(
                 if not polygon:
                     continue
                 xs, ys = [p[0] for p in polygon], [p[1] for p in polygon]
-                corners = {
-                    (min(xs), min(ys)), (max(xs), min(ys)),
-                    (max(xs), max(ys)), (min(xs), max(ys)),
-                }
-                # Only a truly axis-aligned four-corner region is a rectangle.
-                # Every other boundary is preserved as a polygon.
-                is_rect = len(polygon) == 4 and {(x, y) for x, y in polygon} == corners
-                is_ellipse = element_type == "button" and 0.5 <= (max(xs) - min(xs)) / max(1e-6, max(ys) - min(ys)) <= 2.0
+                # Rectangular types: always store AABB. Do not keep skewed AI quads.
+                force_rect = element_type in RECTANGULAR_ELEMENT_TYPES
+                is_ellipse = (
+                    element_type == "button"
+                    and not force_rect
+                    and 0.5 <= (max(xs) - min(xs)) / max(1e-6, max(ys) - min(ys)) <= 2.0
+                )
+                if force_rect:
+                    polygon = _axis_aligned_rect_from_polygon(polygon)
+                    xs, ys = [p[0] for p in polygon], [p[1] for p in polygon]
+                    is_rect = True
+                else:
+                    corners = {
+                        (min(xs), min(ys)), (max(xs), min(ys)),
+                        (max(xs), max(ys)), (min(xs), max(ys)),
+                    }
+                    is_rect = len(polygon) == 4 and {(x, y) for x, y in polygon} == corners
                 if is_ellipse:
                     polygon = _ellipse_polygon(
                         (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2,

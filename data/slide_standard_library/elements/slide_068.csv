@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_068_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.02,0.98,0.02,0.08,,,,,
+slide_068_element_02,i,button,20,ellipse,,,,,0.04,0.2,0.02,0.02,
+slide_068_element_03,2,button,20,ellipse,,,,,0.5,0.3,0.02,0.02,
+slide_068_element_04,3,button,20,ellipse,,,,,0.7,0.3,0.02,0.02,
+slide_068_element_05,1,button,20,ellipse,,,,,0.5,0.7,0.02,0.02,
+slide_068_element_06,"What are Cell Cycle Checkpoints As cells move through the cell cycle, do they breeze through from one phase to the next? In some cells, the answer might be yes. Normal cells, however, move through the cell cycle in a regulated way. They use information about their own internal state and cues from the environment around them to decide whether to proceed with cell division. This regulation makes sure that cells don't divide under unfavorable conditions (for instance, when their DNA is damaged, or when there isn't room for more cells in a tissue or organ).",popup,100,rectangle,0.02,0.58,0.18,0.48,,,,,
+slide_068_element_07,Cell cycle diagram,image,0,rectangle,0.4,0.98,0.2,0.78,,,,,
+slide_068_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

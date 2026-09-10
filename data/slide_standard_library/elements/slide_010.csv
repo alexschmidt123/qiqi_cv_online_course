@@ -1,3 +1,6 @@
 element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
-slide_010_element_01,Close-up biological or cellular image,image,0,rectangle,0.0,1.0,0.0,1.0,,,,,
-slide_010_element_02,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
+slide_010_element_01,Click through Allie’s case to learn more about her treatment.,paragraph,0,rectangle,0.25,0.75,0.15,0.2,,,,,
+slide_010_element_02,Image of patient sitting on examination table,image,0,rectangle,0.05,0.55,0.25,0.65,,,,,
+slide_010_element_03,"What are Cell Cycle Checkpoints? “The cell cycle is a process all cells go through when they grow and divide,” Allie’s oncologist explained, “Healthy cells follow a very controlled pattern—they only divide when they need to. At different stages, there are checkpoints to make sure the cell is functioning properly. “What are the cell cycle checkpoints?” Allie’s mom asked.",paragraph,0,rectangle,0.6,0.95,0.3,0.7,,,,,
+slide_010_element_04,Pagination dots,slide_navigation,0,rectangle,0.45,0.55,0.75,0.8,,,,,
+slide_010_element_05,Entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

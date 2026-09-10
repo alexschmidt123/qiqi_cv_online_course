@@ -1,0 +1,9 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_046_element_01,Click each icon to learn more about the cell cycle checkpoints.,paragraph,0,rectangle,0.02,0.45,0.05,0.12,,,,,
+slide_046_element_02,"Apoptosis (optional, like an emergency exit) Purpose: If a cell has too many problems or is damaged beyond repair, it might choose to self-destruct. Check: The cell evaluates its own health and decides if it's better to sacrifice itself for the greater good. Decision: If the cell chooses apoptosis, it breaks down in a controlled way.",popup,100,rectangle,0.25,0.95,0.1,0.3,,,,,
+slide_046_element_03,Diagram of cell cycle with DNA synthesis and cell growth,image,0,rectangle,0.25,0.75,0.3,0.75,,,,,
+slide_046_element_04,i,button,20,ellipse,,,,,0.075,0.175,0.025,0.025,
+slide_046_element_05,1,button,20,ellipse,,,,,0.625,0.625,0.025,0.025,
+slide_046_element_06,!,button,20,ellipse,,,,,0.925,0.275,0.025,0.025,
+slide_046_element_07,"HELP Click on each of the numbered markers to learn more about the cell cycle checkpoints. When you’ve clicked each tab, click the next arrow to test your knowledge.",popup,100,rectangle,0.7,0.95,0.7,0.95,,,,,
+slide_046_element_08,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

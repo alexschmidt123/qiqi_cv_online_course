@@ -1,6 +1,10 @@
 element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
-slide_017_element_01,Cell Cycle Checkpoints,slide_title,0,polygon,,,,,,,,,0.2500:0.0200;0.7500:0.0800;0.7500:0.1200;0.2500:0.0800
-slide_017_element_02,Instructions for interaction,paragraph,0,polygon,,,,,,,,,0.2000:0.1500;0.8000:0.2000;0.8000:0.2200;0.2000:0.2000
-slide_017_element_03,Diagram of cell cycle,image,0,polygon,,,,,,,,,0.1000:0.2500;0.6000:0.7500;0.6000:0.9000;0.1000:0.7500
-slide_017_element_04,G1 checkpoint information box,popup,100,polygon,,,,,,,,,0.6500:0.3000;0.9500:0.5000;0.9500:0.7000;0.6500:0.5000
-slide_017_element_05,blank area,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
+slide_017_element_01,Click each icon to learn more about each part of the cell cycle. Click the next arrow when you’re ready to test your knowledge.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_017_element_02,"What are Cell Cycle Checkpoints As cells move through the cell cycle, do they breeze through from one phase to the next? If they're cancer cells, the answer might be yes. Normal cells, however, move through the cell cycle in a regulated way. They use information about their own internal state and cues from the environment around them to decide whether to proceed with cell division. This regulation makes sure that cells don't divide under unfavorable conditions (for instance, when their DNA is damaged, or when there isn't room for more cells in a tissue or organ).",popup,100,rectangle,0.05,0.55,0.12,0.65,,,,,
+slide_017_element_03,Cell cycle diagram with phases and numbers,image,0,rectangle,0.55,0.95,0.12,0.65,,,,,
+slide_017_element_04,i,button,20,ellipse,,,,,0.045,0.145,0.025,0.025,
+slide_017_element_05,1,button,20,ellipse,,,,,0.705,0.575,0.025,0.025,
+slide_017_element_06,2,button,20,ellipse,,,,,0.705,0.275,0.025,0.025,
+slide_017_element_07,3,button,20,ellipse,,,,,0.825,0.225,0.025,0.025,
+slide_017_element_08,!,button,20,ellipse,,,,,0.875,0.575,0.025,0.025,
+slide_017_element_09,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,

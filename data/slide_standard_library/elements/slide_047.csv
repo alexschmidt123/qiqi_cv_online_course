@@ -1,0 +1,8 @@
+element_id,decision,element_type,priority,shape,x_min,x_max,y_min,y_max,center_x,center_y,radius_x,radius_y,points
+slide_047_element_01,Use what you’ve learned to answer questions about white blood cells. Click the back arrow to if you need to review what you’ve learned.,paragraph,0,rectangle,0.05,0.95,0.02,0.08,,,,,
+slide_047_element_02,What happens during the G1 checkpoint?,slide_title,10,rectangle,0.2,0.8,0.15,0.22,,,,,
+slide_047_element_03,The cell checks for DNA damage,paragraph,0,rectangle,0.2,0.8,0.25,0.3,,,,,
+slide_047_element_04,The cell ensures chromosomes are aligned,paragraph,0,rectangle,0.2,0.8,0.32,0.37,,,,,
+slide_047_element_05,The cell decides whether to divide or not,paragraph,0,rectangle,0.2,0.8,0.39,0.44,,,,,
+slide_047_element_06,The cell splits into two daughter cells,paragraph,0,rectangle,0.2,0.8,0.46,0.51,,,,,
+slide_047_element_07,entire image,blank_area,-100,rectangle,0.0,1.0,0.0,1.0,,,,,
